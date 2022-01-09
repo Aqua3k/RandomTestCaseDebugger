@@ -89,7 +89,8 @@ def main():
         if len(file) != 2:
             pass
         elif not filecmp.cmp(*file):
-            result.append(testCaseName)
+            fileName = testCaseName.split("\\")[:-1]
+            result.append(fileName)
     
     MakeResultFile()
 

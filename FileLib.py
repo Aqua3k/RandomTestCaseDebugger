@@ -15,7 +15,6 @@ def SetFileName(testCaseName, module):
     d = glob.glob(dl.outPath + "*")
     if dl.outPath + outFilePath not in d:
         os.mkdir(dl.outPath + outFilePath)
-        print(1)
 def GetInputFileName():
     return inputFileName
 def GetOutputFileName():
