@@ -44,8 +44,7 @@ def ExacGreedy():
     if "greedy" in sys.modules: del sys.modules["greedy"]
 
 def InitResult():
-    try: shutil.rmtree(outPath)
-    except: pass
+    shutil.rmtree(outPath, ignore_errors=True)
     os.mkdir(outPath)
 
 def MakeResultFile():
