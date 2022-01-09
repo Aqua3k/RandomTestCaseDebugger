@@ -9,12 +9,12 @@ def SetFileName(testCaseName, module):
     global inputFileName, outputFileName, outFilePath
     inputFileName = testCaseName
     outputFileName = module + ".txt"
-    outFilePath = testCaseName.split("\\")[-1]
+    outFilePath = os.path.basename(testCaseName)
     outFilePath = outFilePath.split(".")[0]
 
-    d = glob.glob(dl.outPath + "*")
-    if dl.outPath + outFilePath not in d:
-        os.mkdir(dl.outPath + outFilePath)
+    d = glob.glob(os.path.join(dl.outPath, "*"))
+    if os.path.join(dl.outPath, outFilePath) not in d:
+        os.mkdir(os.path.join(dl.outPath, outFilePath))
 def GetInputFileName():
     return inputFileName
 def GetOutputFileName():
