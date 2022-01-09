@@ -25,10 +25,6 @@ def DebugInput():
 def GetAllFileName():
     return glob.glob(os.path.join(tcm.testCaseDirec, "*"))
 
-def InitResultFile():
-    f = open(os.path.join(outPath, fl.GetOutputFilePath(), fl.GetOutputFileName()), 'a')
-    f.close()
-
 messages = []
 def ExacMain():
     try:
@@ -75,12 +71,10 @@ def main():
         #テストケース実行
         fl.SetFileName(testCaseName, "main")
         fl.SetFileContents()
-        InitResultFile()
         ExacMain()
 
         fl.SetFileName(testCaseName, "greedy")
         fl.SetFileContents()
-        InitResultFile()
         ExacGreedy()
 
         #比較
