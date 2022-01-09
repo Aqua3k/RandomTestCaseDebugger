@@ -1,6 +1,5 @@
 import Debug as dl
 import os
-import glob
 
 inputFileName = ""
 outputFileName = ""
@@ -9,12 +8,9 @@ def SetFileName(testCaseName, module):
     global inputFileName, outputFileName, outFilePath
     inputFileName = testCaseName
     outputFileName = module + ".txt"
-    outFilePath = os.path.basename(testCaseName)
-    outFilePath = outFilePath.split(".")[0]
+    outFilePath = os.path.basename(testCaseName).split(".")[0]
 
-    d = glob.glob(os.path.join(dl.outPath, "*"))
-    if os.path.join(dl.outPath, outFilePath) not in d:
-        os.mkdir(os.path.join(dl.outPath, outFilePath))
+    os.makedirs(os.path.join(dl.outPath, outFilePath), exist_ok=True)
 def GetInputFileName():
     return inputFileName
 def GetOutputFileName():
