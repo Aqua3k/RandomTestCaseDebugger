@@ -1,0 +1,13 @@
+10 difference found.
+in\case1.txt
+in\case10.txt
+in\case2.txt
+in\case3.txt
+in\case4.txt
+in\case5.txt
+in\case6.txt
+in\case7.txt
+in\case8.txt
+in\case9.txt
+
+No error occured.
