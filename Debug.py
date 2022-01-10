@@ -6,14 +6,14 @@ import TestCaseMaker as tcm
 import FileLib as fl
 import filecmp
 
-outPath = "out\\"
+outPath = "out"
 outFile = "Result"
 
 ####################################
 #Debug用の入出力
 
 def DebugPrint(*arg, **keys):
-    f = open(outPath + fl.GetOutputFilePath() + "\\" + fl.GetOutputFileName(), 'a')
+    f = open(os.path.join(outPath, fl.GetOutputFilePath(), fl.GetOutputFileName()), 'a')
     print(*arg, **keys, file=f)
     f.close()
 
@@ -23,11 +23,7 @@ def DebugInput():
 ####################################
 
 def GetAllFileName():
-    return glob.glob(tcm.testCaseDirec + "*")
-
-def InitResultFile():
-    f = open(outPath + fl.GetOutputFilePath() + "\\" + fl.GetOutputFileName(), 'a')
-    f.close()
+    return glob.glob(os.path.join(tcm.testCaseDirec, "*"))
 
 messages = []
 def ExacMain():
@@ -38,7 +34,7 @@ def ExacMain():
         errMessage = str(fileName + e)
         messages.append(errMessage)
     if "main" in sys.modules: del sys.modules["main"]
-    
+
 def ExacGreedy():
     try:
         import greedy
@@ -48,8 +44,7 @@ def ExacGreedy():
     if "greedy" in sys.modules: del sys.modules["greedy"]
 
 def InitResult():
-    try: shutil.rmtree(outPath)
-    except: pass
+    shutil.rmtree(outPath, ignore_errors=True)
     os.mkdir(outPath)
 
 def MakeResultFile():
@@ -70,28 +65,26 @@ result = []
 def main():
     InitResult()
     allTestCaseName = GetAllFileName()
-    
+
     for testCaseName in allTestCaseName:
         #テストケース実行
         fl.SetFileName(testCaseName, "main")
         fl.SetFileContents()
-        InitResultFile()
         ExacMain()
 
         fl.SetFileName(testCaseName, "greedy")
         fl.SetFileContents()
-        InitResultFile()
         ExacGreedy()
 
         #比較
-        path = outPath + fl.GetOutputFilePath() + "\\"
-        file = glob.glob(path + "*")
+        path = os.path.join(outPath, fl.GetOutputFilePath(), "*")
+        file = glob.glob(path)
         if len(file) != 2:
             pass
         elif not filecmp.cmp(*file):
-            fileName = testCaseName.split("\\")[:-1]
+            fileName = os.path.basename(testCaseName)
             result.append(fileName)
-    
+
     MakeResultFile()
 
 if __name__ == "__main__":

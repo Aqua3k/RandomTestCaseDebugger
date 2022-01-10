@@ -3,9 +3,10 @@
 """
 
 import random
+import os
 
 testCaseNum = 10
-testCaseDirec = "in\\"
+testCaseDirec = "in"
 testCaseFileName = "case"
 
 ####################################
@@ -25,7 +26,7 @@ def MakeTestCase():
 def PrintTestCase(*arg, **keys):
     global idx
     fileName = testCaseFileName + str(idx+1) + ".txt"
-    f = open(testCaseDirec + fileName, 'a')
+    f = open(os.path.join(testCaseDirec, fileName), 'a')
     print(*arg, **keys, file=f)
     f.close()
 
@@ -34,7 +35,7 @@ def PrintTestCase(*arg, **keys):
 def InitFile():
     global idx
     fileName = testCaseFileName + str(idx+1) + ".txt"
-    f = open(testCaseDirec + fileName, 'w')
+    f = open(os.path.join(testCaseDirec, fileName), 'w')
     f.close()
 
 idx = 0
@@ -79,7 +80,7 @@ def MakeRandomString(length=10,same="True"):
     for i in range(length):
         r = 0
         if same: r = random.randint(0,1)
-        
+
         if r == 0 and len(s):
             p = random.randint(0, len(s)-1)
             ret += list(s)[p]
