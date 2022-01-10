@@ -1,22 +1,10 @@
-DEBUG = 0
-if __name__ != "__main__":
-    DEBUG = 1
-    import Debug as dl
+def main():
+    n, m = map(int, input().split())
+    a = list(map(int, input().split()))
+    b = list(map(int, input().split()))
 
-def MyInput():
-    global DEBUG
-    if DEBUG: return dl.DebugInput()
-    else: return input()
+    print(sum(a), min(b))
 
-def MyPrint(*arg, **keys):
-    global DEBUG
-    if DEBUG: return dl.DebugPrint(*arg, **keys)
-    else: return print(*arg, **keys)
 
-######################################################################
-
-n, m = map(int,MyInput().split())
-a = list(map(int,MyInput().split()))
-b =  list(map(int,MyInput().split()))
-
-MyPrint(sum(a), min(b))
+if __name__ == '__main__':
+    main()
