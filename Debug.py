@@ -29,6 +29,9 @@ messages = []
 def ExacMain():
     try:
         import main
+        main.print = DebugPrint
+        main.input = DebugInput
+        main.main()
     except Exception as e:
         fileName = fl.GetOutputFileName()
         errMessage = str(fileName + e)
@@ -38,6 +41,9 @@ def ExacMain():
 def ExacGreedy():
     try:
         import greedy
+        greedy.print = DebugPrint
+        greedy.input = DebugInput
+        greedy.main()
     except Exception as e:
         errMessage = str(e)
         messages.append(errMessage)
