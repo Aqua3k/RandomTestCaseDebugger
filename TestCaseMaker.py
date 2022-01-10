@@ -4,6 +4,7 @@
 
 import random
 import os
+import shutil
 
 testCaseNum = 10
 testCaseDirec = "in"
@@ -125,7 +126,12 @@ def MakeRandomArray(length, minVal, maxVal, type="int", permutation=False, order
     elif order == "D": ret = sorted(ret, reverse=True)
     return ret
 
+def InitTestCaseDirectory():
+    shutil.rmtree(testCaseDirec, ignore_errors=True)
+    os.mkdir(testCaseDirec)
+
 def main():
+    InitTestCaseDirectory()
     MakeAllTestCase()
 
 if __name__ == "__main__":
