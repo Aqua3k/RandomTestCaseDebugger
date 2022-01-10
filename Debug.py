@@ -33,8 +33,8 @@ def ExacMain():
         main.input = DebugInput
         main.main()
     except Exception as e:
-        fileName = fl.GetOutputFileName()
-        errMessage = str(fileName + e)
+        fileName = os.path.basename(fl.GetInputFileName())
+        errMessage = fileName + " main\n" + str(e)
         messages.append(errMessage)
     if "main" in sys.modules: del sys.modules["main"]
 
@@ -45,7 +45,8 @@ def ExacGreedy():
         greedy.input = DebugInput
         greedy.main()
     except Exception as e:
-        errMessage = str(e)
+        fileName = os.path.basename(fl.GetInputFileName())
+        errMessage = fileName + " greedy\n" + str(e)
         messages.append(errMessage)
     if "greedy" in sys.modules: del sys.modules["greedy"]
 
