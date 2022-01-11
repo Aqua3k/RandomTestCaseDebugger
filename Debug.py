@@ -26,29 +26,29 @@ def GetAllFileName():
     return glob.glob(os.path.join(tcm.testCaseDirec, "*"))
 
 messages = []
-def ExacMain():
+def ExacSolve1():
     try:
-        import main
-        main.print = DebugPrint
-        main.input = DebugInput
-        main.main()
+        import Solve1
+        Solve1.print = DebugPrint
+        Solve1.input = DebugInput
+        Solve1.main()
     except Exception as e:
         fileName = os.path.basename(fl.GetInputFileName())
-        errMessage = fileName + " main\n" + str(e)
+        errMessage = fileName + " Solve1\n" + str(e)
         messages.append(errMessage)
-    if "main" in sys.modules: del sys.modules["main"]
+    if "Solve1" in sys.modules: del sys.modules["Solve1"]
 
-def ExacGreedy():
+def ExacSolve2():
     try:
-        import greedy
-        greedy.print = DebugPrint
-        greedy.input = DebugInput
-        greedy.main()
+        import Solve2
+        Solve2.print = DebugPrint
+        Solve2.input = DebugInput
+        Solve2.main()
     except Exception as e:
         fileName = os.path.basename(fl.GetInputFileName())
-        errMessage = fileName + " greedy\n" + str(e)
+        errMessage = fileName + " Solve2\n" + str(e)
         messages.append(errMessage)
-    if "greedy" in sys.modules: del sys.modules["greedy"]
+    if "Solve2" in sys.modules: del sys.modules["Solve2"]
 
 def InitResult():
     shutil.rmtree(outPath, ignore_errors=True)
@@ -75,13 +75,13 @@ def main():
 
     for testCaseName in allTestCaseName:
         #テストケース実行
-        fl.SetFileName(testCaseName, "main")
+        fl.SetFileName(testCaseName, "Solve1")
         fl.SetFileContents()
-        ExacMain()
+        ExacSolve1()
 
-        fl.SetFileName(testCaseName, "greedy")
+        fl.SetFileName(testCaseName, "Solve2")
         fl.SetFileContents()
-        ExacGreedy()
+        ExacSolve2()
 
         #比較
         path = os.path.join(outPath, fl.GetOutputFilePath(), "*")
