@@ -15,13 +15,14 @@ testCaseFileName = "case"
 # テストケースの入力形式を書く
 def MakeTestCase():
     # Write Code Here
-    n = MakeRandomValue(2, 30)
-    m = MakeRandomValue(2, 30)
-
-    m,z = MakeRandomGraph(n,m,tree=True)
+    n = MakeRandomValue(2, 10)
+    m = MakeRandomValue(2, 10)
     PrintTestCase(n, m)
-    for a in z:
-        PrintTestCase(*a)
+
+    a = MakeRandomArray(n, 1, 10)
+    b = MakeRandomArray(m, 1, 10)
+    PrintTestCase(*a)
+    PrintTestCase(*b)
 
 # ファイルに出力
 def PrintTestCase(*arg, **keys):
@@ -189,12 +190,9 @@ def MakeRandomGraph(N, M, weight=False, weightMin=1, weightMax=100,\
     elif connect: #連結なら辺の数は最低N-1
         if M < N-1:
             M = N-1
-    if multiEdge:
-        edgeMax = 10**18 #無限大
-    elif not selfEdge:
-        edgeMax = N*(N-1)//2
-    else:
-        edgeMax = N**2
+    if multiEdge:      edgeMax = 10**18 #無限大
+    elif not selfEdge: edgeMax = N*(N-1)//2
+    else:              edgeMax = N*(N+1)//2
     M = min(edgeMax, M)
 
     ret = []
@@ -204,31 +202,26 @@ def MakeRandomGraph(N, M, weight=False, weightMin=1, weightMax=100,\
     while len(ret) < M:
         u = random.randint(0,N-1) + index
         v = random.randint(0,N-1) + index
-        if check(N,M,u,v,edgeSet,uf,tree,connect,selfEdge,multiEdge):
+        if Check(N,len(ret),u,v,edgeSet,uf,tree,connect,selfEdge,multiEdge):
             edgeSet.add((u,v))
             edgeSet.add((v,u))
             uf.union(u,v)
-            w = random.randint(weightMin, weightMax)
             if weight:
+                w = random.randint(weightMin, weightMax)
                 ret.append([u,v,w])
             else:
                 ret.append([u,v])
-    #random.shuffle(ret)    
+    random.shuffle(ret)    
     return M, ret
 
-def check(N,M,u,v,edgeSet,uf,tree,connect,selfEdge,multiEdge):
-    if not selfEdge:
-        if u == v: #自己辺を許さないならFalse
-            return False
+def Check(N,edgeNum,u,v,edgeSet,uf,tree,connect,selfEdge,multiEdge):
+    if not selfEdge: #自己辺を許さなくてu=vならFalse
+        if u == v: return False
     if tree or connect: #連結させる必要があるなら
-        if len(edgeSet) <= N-1: #まだ連結していない2点ではないといけない
-            if uf.same(u,v):
-                return False
-            else:
-                return True
+        if edgeNum < N-1: #まだ連結していない2点ではないといけない
+            if uf.same(u,v): return False
     if not multiEdge:
-        if (u,v) in edgeSet or (v,u) in edgeSet:
-            return False
+        if (u,v) in edgeSet or (v,u) in edgeSet: return False
     return True
 
 def InitTestCaseDirectory():
