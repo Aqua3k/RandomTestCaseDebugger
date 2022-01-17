@@ -12,8 +12,9 @@ testCaseDirec = "in"
 testCaseFileName = "case"
 
 ####################################
-# テストケースの入力形式を書く
+
 def MakeTestCase():
+    """テストケースの入力形式を書く"""
     # Write Code Here
     n = MakeRandomValue(2, 10)
     m = MakeRandomValue(2, 10)
@@ -24,33 +25,28 @@ def MakeTestCase():
     PrintTestCase(*a)
     PrintTestCase(*b)
 
-# ファイルに出力
 def PrintTestCase(*arg, **keys):
+    """ファイルに出力"""
     global idx
     fileName = testCaseFileName + str(idx+1) + ".txt"
-    f = open(os.path.join(testCaseDirec, fileName), 'a')
+    f = open(os.path.join(testCaseDirec, fileName), 'w')
     print(*arg, **keys, file=f)
     f.close()
 
 ####################################
 
-def InitFile():
-    global idx
-    fileName = testCaseFileName + str(idx+1) + ".txt"
-    f = open(os.path.join(testCaseDirec, fileName), 'w')
-    f.close()
-
 idx = 0
 def MakeAllTestCase():
+    """全テストケースを作成"""
     global testCaseNum
     for i in range(testCaseNum):
         global idx
         idx = i
-        InitFile()
         MakeTestCase()
 
 ####################################
-#以下、ランダム入力生成用のライブラリ
+
+# 以下、ランダム入力生成用のライブラリ
 
 # 各関数についている引数コメントの説明
 #    ◆arg
@@ -62,33 +58,36 @@ def MakeAllTestCase():
 #       説明文の後ろの"defaultValue"がデフォルト値になります
 #       引数を指定するときは func(key=value) のようにして値を与えてください
 
-
-# 値を生成する
-# 引数
-#    ◆minVal
-#      最小値
-#    ◆maxVal
-#      最大値
-#    ◆type
-#  　   "int":      整数
-#      "float":     小数
-#    ◆keta
-#      小数を指定する場合の小数点以下の最大桁数
-#      何も指定しなければketa=9
 def MakeRandomValue(minVal, maxVal, type="int", keta=9):
+    """値を生成する
+
+    引数
+        ◆minVal
+            最小値
+        ◆maxVal
+            最大値
+        ◆type
+            "int":      整数
+            "float":    小数
+        ◆keta
+            小数を指定する場合の小数点以下の最大桁数
+            何も指定しなければketa=9
+    """
     if type == "int":   return random.randint(minVal, maxVal)
     if type == "float": return round(random.uniform(minVal, maxVal), keta)
     assert 0, "type error in MakeRandomValue()"
 
-# アルファベット小文字のみの文字列を生成する
-# 引数
-#   ◆length
-#       文字列の長さ
-#   ◆same (= True)
-#       通常は同じ文字を多く含んでいた方が都合がいいことが多い(数え上げとか)ので、
-#       同じ文字を含みやすい生成方法を使っている
-#       完全ランダムにしたい場合はsame=Falseを指定
 def MakeRandomString(length=10,same="True"):
+    """アルファベット小文字のみの文字列を生成する
+
+    引数
+        ◆length
+            文字列の長さ
+        ◆same (= True)
+            通常は同じ文字を多く含んでいた方が都合がいいことが多い(数え上げとか)ので、
+            同じ文字を含みやすい生成方法を使っている
+            完全ランダムにしたい場合はsame=Falseを指定
+    """
     ret = ""
     s = set()
     for i in range(length):
@@ -105,26 +104,27 @@ def MakeRandomString(length=10,same="True"):
             s.add(c)
     return ret
 
-# 配列の作成
-# 引数
-#   ◆length
-#       配列の長さ
-#   ◆minVal
-#       最小値
-#   ◆maxVal
-#       最大値
-#   ◆type
-#       "int":      整数
-#       "float":    小数
-#       "str":      文字列
-#   ◆permutation (= False)
-#       =Trueのとき、長さlengthの順列を作成する(length以外の引数は使わない)
-#       デフォルトはFalse
-#   ◆order (= None)
-#       "U":    昇順ソート済み
-#       "D":    降順ソート済み
-#       other:  指定しない(たまたまソートされた状態になる可能性はある)
 def MakeRandomArray(length, minVal, maxVal, type="int", permutation=False, order=None):
+    """配列の作成
+    引数
+        ◆length
+            配列の長さ
+        ◆minVal
+            最小値
+        ◆maxVal
+            最大値
+        ◆type
+            "int":      整数
+            "float":    小数
+            "str":      文字列
+        ◆permutation (= False)
+            =Trueのとき、長さlengthの順列を作成する(length以外の引数は使わない)
+            デフォルトはFalse
+        ◆order (= None)
+            "U":    昇順ソート済み
+            "D":    降順ソート済み
+            other:  指定しない(たまたまソートされた状態になる可能性はある)
+    """
     if permutation:
         L = list(range(1, length+1))
         random.shuffle(L)
@@ -140,48 +140,50 @@ def MakeRandomArray(length, minVal, maxVal, type="int", permutation=False, order
     elif order == "D": ret = sorted(ret, reverse=True)
     return ret
 
-# グラフの生成
-# 戻り値の形式
-#   M, UV
-#   M:    UVの長さ
-#   UV:   長さM*2(重さありを指定した場合はM*3)の2次元配列を返す
-# i番目の辺がuiとvi(重さをwi)を結ぶとすると、
-# [[u1, v1, (w1)], [u2, v2, (w2)], ..., [um, vm, (wm)]]
-# という形式
-# 引数
-#   ◆N
-#       頂点数
-#   ◆M
-#       辺の数
-#   ◆cost (= False)
-#       True:   辺に重みあり
-#       False:  辺に重みなし
-#   ◆costMin (= 1)
-#   ◆costMax (= 100)
-#       重みの最小値と最大値
-#       weight=Falseのときは使わない
-#   ◆tree (= False)
-#       True:   グラフは木(M = N-1になる)
-#       False:  指定しない(できたグラフがたまたま木である可能性はある)
-#   ◆connect (= False)
-#       True:   作成されるグラフは連結
-#               (M < N-1のとき、M = N-1になる)
-#       False:  指定しない(できるグラフがたまたま連結になる可能性はある)
-#   ◆selfEdge (= False)
-#       True:   自己辺の存在を許す
-#       False:  自己辺は存在しない
-#   ◆multiEdge (= False)
-#       True:   多重辺の存在を許す
-#       False:  多重辺は存在しない
-#   ◆index (= 1)
-#       0:      0-indexで頂点を表す
-#       1:      1-indexで頂点を表す
-#   other:  Error
-# note: selfEdgeとmultiEdgeの結果を考慮し、
-#       Mがあり得る上限より大きいときは上限値に丸められる
 def MakeRandomGraph(N, M, weight=False, weightMin=1, weightMax=100,\
     tree=False, connect=False, selfEdge=False, multiEdge=False, index=1):
-    
+    """グラフの生成
+
+    戻り値の形式
+        M, UV
+        M:    UVの長さ
+        UV:   長さM*2(重さありを指定した場合はM*3)の2次元配列を返す
+    i番目の辺がuiとvi(重さをwi)を結ぶとすると、
+    [[u1, v1, (w1)], [u2, v2, (w2)], ..., [um, vm, (wm)]]
+    という形式
+    引数
+        ◆N
+            頂点数
+        ◆M
+            辺の数
+        ◆cost (= False)
+            True:   辺に重みあり
+            False:  辺に重みなし
+        ◆costMin (= 1)
+        ◆costMax (= 100)
+            重みの最小値と最大値
+            weight=Falseのときは使わない
+        ◆tree (= False)
+            True:   グラフは木(M = N-1になる)
+            False:  指定しない(できたグラフがたまたま木である可能性はある)
+        ◆connect (= False)
+            True:   作成されるグラフは連結
+                    (M < N-1のとき、M = N-1になる)
+            False:  指定しない(できるグラフがたまたま連結になる可能性はある)
+        ◆selfEdge (= False)
+            True:   自己辺の存在を許す
+            False:  自己辺は存在しない
+        ◆multiEdge (= False)
+            True:   多重辺の存在を許す
+            False:  多重辺は存在しない
+        ◆index (= 1)
+            0:      0-indexで頂点を表す
+            1:      1-indexで頂点を表す
+        other:  Error
+    note: selfEdgeとmultiEdgeの結果を考慮し、
+          Mがあり得る上限より大きいときは上限値に丸められる
+    """
+
     assert 0 <= index <= 1, "index value error in MakeRandomGraph()"
 
     #値の範囲のチェック
@@ -211,10 +213,11 @@ def MakeRandomGraph(N, M, weight=False, weightMin=1, weightMax=100,\
                 ret.append([u,v,w])
             else:
                 ret.append([u,v])
-    random.shuffle(ret)    
+    random.shuffle(ret)
     return M, ret
 
 def Check(N,edgeNum,u,v,edgeSet,uf,tree,connect,selfEdge,multiEdge):
+    """引数で指定した木構造になるかどうかを判定"""
     if not selfEdge: #自己辺を許さなくてu=vならFalse
         if u == v: return False
     if tree or connect: #連結させる必要があるなら
@@ -225,6 +228,7 @@ def Check(N,edgeNum,u,v,edgeSet,uf,tree,connect,selfEdge,multiEdge):
     return True
 
 def InitTestCaseDirectory():
+    """テストケースディレクトリの初期化"""
     shutil.rmtree(testCaseDirec, ignore_errors=True)
     os.mkdir(testCaseDirec)
 
