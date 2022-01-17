@@ -1,3 +1,7 @@
+"""
+Solve1.pyとSolve2.pyをそれぞれのテストケースで実行し、実行結果の差を出力する
+"""
+
 import sys
 import glob
 import os
@@ -13,20 +17,24 @@ outFile = "Result"
 #Debug用の入出力
 
 def DebugPrint(*arg, **keys):
+    """実行結果をファイルに出力させる"""
     f = open(os.path.join(outPath, fl.GetOutputFilePath(), fl.GetOutputFileName()), 'a')
     print(*arg, **keys, file=f)
     f.close()
 
 def DebugInput():
+    """入力をテストケースから読み取る"""
     return str(fl.fileContents.pop())
 
 ####################################
 
 def GetAllFileName():
+    """すべてのテストケースファイルを取得する"""
     return glob.glob(os.path.join(tcm.testCaseDirec, "*"))
 
 messages = []
 def ExacSolve1():
+    """Solve1.pyを実行して結果を記録する"""
     try:
         import Solve1
         Solve1.print = DebugPrint
@@ -39,6 +47,7 @@ def ExacSolve1():
     if "Solve1" in sys.modules: del sys.modules["Solve1"]
 
 def ExacSolve2():
+    """Solve2.pyを実行して結果を記録する"""
     try:
         import Solve2
         Solve2.print = DebugPrint
@@ -51,10 +60,12 @@ def ExacSolve2():
     if "Solve2" in sys.modules: del sys.modules["Solve2"]
 
 def InitResult():
+    """実行結果の出力先ディレクトリを初期化する"""
     shutil.rmtree(outPath, ignore_errors=True)
     os.mkdir(outPath)
 
 def MakeResultFile():
+    """実行結果ファイルを作成する"""
     f = open("result.txt", 'w')
     if not len(result):
         print("No difference.", file=f)
