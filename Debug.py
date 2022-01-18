@@ -2,13 +2,17 @@
 Solve1.pyとSolve2.pyをそれぞれのテストケースで実行し、実行結果の差を出力する
 """
 
+from __future__ import annotations
+
 import sys
 import glob
 import os
 import shutil
+import filecmp
+from typing import Any
+
 import TestCaseMaker as tcm
 import FileLib as fl
-import filecmp
 
 outPath = "out"
 outFile = "Result"
@@ -16,24 +20,24 @@ outFile = "Result"
 ####################################
 #Debug用の入出力
 
-def DebugPrint(*arg, **keys):
+def DebugPrint(*arg: Any, **keys: Any) -> None:
     """実行結果をファイルに出力させる"""
     f = open(os.path.join(outPath, fl.GetOutputFilePath(), fl.GetOutputFileName()), 'a')
     print(*arg, **keys, file=f)
     f.close()
 
-def DebugInput():
+def DebugInput() -> str:
     """入力をテストケースから読み取る"""
     return str(fl.fileContents.pop())
 
 ####################################
 
-def GetAllFileName():
+def GetAllFileName() -> list[str]:
     """すべてのテストケースファイルを取得する"""
     return glob.glob(os.path.join(tcm.testCaseDirec, "*"))
 
 messages = []
-def ExacSolve1():
+def ExacSolve1() -> None:
     """Solve1.pyを実行して結果を記録する"""
     try:
         import Solve1
@@ -46,7 +50,7 @@ def ExacSolve1():
         messages.append(errMessage)
     if "Solve1" in sys.modules: del sys.modules["Solve1"]
 
-def ExacSolve2():
+def ExacSolve2() -> None:
     """Solve2.pyを実行して結果を記録する"""
     try:
         import Solve2
@@ -59,12 +63,12 @@ def ExacSolve2():
         messages.append(errMessage)
     if "Solve2" in sys.modules: del sys.modules["Solve2"]
 
-def InitResult():
+def InitResult() -> None:
     """実行結果の出力先ディレクトリを初期化する"""
     shutil.rmtree(outPath, ignore_errors=True)
     os.mkdir(outPath)
 
-def MakeResultFile():
+def MakeResultFile() -> None:
     """実行結果ファイルを作成する"""
     f = open("result.txt", 'w')
     if not len(result):
@@ -80,7 +84,7 @@ def MakeResultFile():
         print(*messages, sep="\n", file=f)
 
 result = []
-def main():
+def main() -> None:
     InitResult()
     allTestCaseName = GetAllFileName()
 
