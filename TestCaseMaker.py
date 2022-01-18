@@ -2,10 +2,17 @@
 テストケースを作成する
 """
 
+from __future__ import annotations
+
 import random
 import os
 import shutil
+from typing import Any, Union, Literal, Optional
+
 from MyLib import *
+
+Number = Union[int, float]
+NumberType = Literal['int', 'float']
 
 testCaseNum = 10
 testCaseDirec = "in"
@@ -13,7 +20,7 @@ testCaseFileName = "case"
 
 ####################################
 
-def MakeTestCase():
+def MakeTestCase() -> None:
     """テストケースの入力形式を書く"""
     # Write Code Here
     n = MakeRandomValue(2, 10)
@@ -25,7 +32,7 @@ def MakeTestCase():
     PrintTestCase(*a)
     PrintTestCase(*b)
 
-def PrintTestCase(*arg, **keys):
+def PrintTestCase(*arg: Any, **keys: Any) -> None:
     """ファイルに出力"""
     global idx
     fileName = testCaseFileName + str(idx+1) + ".txt"
@@ -36,7 +43,7 @@ def PrintTestCase(*arg, **keys):
 ####################################
 
 idx = 0
-def MakeAllTestCase():
+def MakeAllTestCase() -> None:
     """全テストケースを作成"""
     global testCaseNum
     for i in range(testCaseNum):
@@ -58,7 +65,7 @@ def MakeAllTestCase():
 #       説明文の後ろの"defaultValue"がデフォルト値になります
 #       引数を指定するときは func(key=value) のようにして値を与えてください
 
-def MakeRandomValue(minVal, maxVal, type="int", keta=9):
+def MakeRandomValue(minVal: Number, maxVal: Number, type: NumberType = 'int', keta: int = 9) -> Number:
     """値を生成する
 
     引数
@@ -77,7 +84,7 @@ def MakeRandomValue(minVal, maxVal, type="int", keta=9):
     if type == "float": return round(random.uniform(minVal, maxVal), keta)
     assert 0, "type error in MakeRandomValue()"
 
-def MakeRandomString(length=10,same="True"):
+def MakeRandomString(length: int = 10, same: bool = True) -> str:
     """アルファベット小文字のみの文字列を生成する
 
     引数
@@ -104,7 +111,8 @@ def MakeRandomString(length=10,same="True"):
             s.add(c)
     return ret
 
-def MakeRandomArray(length, minVal, maxVal, type="int", permutation=False, order=None):
+def MakeRandomArray(length: int, minVal: Number, maxVal, type: NumberType | Literal['str'] = 'int',
+                    permutation: bool = False, order: Optional[Literal['U', 'D']] = None) -> list[Number | str]:
     """配列の作成
     引数
         ◆length
@@ -140,8 +148,9 @@ def MakeRandomArray(length, minVal, maxVal, type="int", permutation=False, order
     elif order == "D": ret = sorted(ret, reverse=True)
     return ret
 
-def MakeRandomGraph(N, M, weight=False, weightMin=1, weightMax=100,\
-    tree=False, connect=False, selfEdge=False, multiEdge=False, index=1):
+def MakeRandomGraph(N: int, M: int, weight: bool = False, weightMin: int = 1,
+                    weightMax: int = 100, tree: bool = False, connect: bool = False,
+                    selfEdge: bool = False, multiEdge: bool = False, index: bool = 1) -> tuple[int, list[int]]:
     """グラフの生成
 
     戻り値の形式
@@ -216,7 +225,8 @@ def MakeRandomGraph(N, M, weight=False, weightMin=1, weightMax=100,\
     random.shuffle(ret)
     return M, ret
 
-def Check(N,edgeNum,u,v,edgeSet,uf,tree,connect,selfEdge,multiEdge):
+def Check(N: int, edgeNum: int, u: int, v: int, edgeSet: set[list[tuple[int, int]]],
+          uf: UnionFind, tree: bool, connect: bool, selfEdge: bool, multiEdge: bool) -> bool:
     """引数で指定したグラフになるかどうかを判定"""
     if not selfEdge: #自己辺を許さなくてu=vならFalse
         if u == v: return False
@@ -227,7 +237,7 @@ def Check(N,edgeNum,u,v,edgeSet,uf,tree,connect,selfEdge,multiEdge):
         if (u,v) in edgeSet or (v,u) in edgeSet: return False
     return True
 
-def InitTestCaseDirectory():
+def InitTestCaseDirectory() -> None:
     """テストケースディレクトリの初期化"""
     shutil.rmtree(testCaseDirec, ignore_errors=True)
     os.mkdir(testCaseDirec)

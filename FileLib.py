@@ -8,7 +8,7 @@ import os
 inputFileName = ""
 outputFileName = ""
 outFilePath = ""
-def SetFileName(testCaseName, module):
+def SetFileName(testCaseName: str, module: str) -> None:
     """実行するテストケースとその結果ファイルを一時的に記録"""
     global inputFileName, outputFileName, outFilePath
     inputFileName = testCaseName
@@ -16,18 +16,18 @@ def SetFileName(testCaseName, module):
     outFilePath = os.path.basename(testCaseName).split(".")[0]
 
     os.makedirs(os.path.join(dl.outPath, outFilePath), exist_ok=True)
-def GetInputFileName():
+def GetInputFileName() -> str:
     """実行するテストケースファイル名を取得"""
     return inputFileName
-def GetOutputFileName():
+def GetOutputFileName() -> str:
     """実行結果の出力先のファイル名を取得"""
     return outputFileName
-def GetOutputFilePath():
+def GetOutputFilePath() -> str:
     """実行結果の出力先パスを取得"""
     return outFilePath
 
 fileContents = []
-def SetFileContents():
+def SetFileContents() -> None:
     """テストケースの各行を読み込みfileContentsに保存"""
     global fileContents
     path = GetInputFileName()
