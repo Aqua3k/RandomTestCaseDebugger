@@ -29,7 +29,7 @@ def PrintTestCase(*arg, **keys):
     """ファイルに出力"""
     global idx
     fileName = testCaseFileName + str(idx+1) + ".txt"
-    f = open(os.path.join(testCaseDirec, fileName), 'w')
+    f = open(os.path.join(testCaseDirec, fileName), 'a')
     print(*arg, **keys, file=f)
     f.close()
 
