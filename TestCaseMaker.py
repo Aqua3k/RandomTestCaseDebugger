@@ -217,7 +217,7 @@ def MakeRandomGraph(N, M, weight=False, weightMin=1, weightMax=100,\
     return M, ret
 
 def Check(N,edgeNum,u,v,edgeSet,uf,tree,connect,selfEdge,multiEdge):
-    """引数で指定した木構造になるかどうかを判定"""
+    """引数で指定したグラフになるかどうかを判定"""
     if not selfEdge: #自己辺を許さなくてu=vならFalse
         if u == v: return False
     if tree or connect: #連結させる必要があるなら
