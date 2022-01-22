@@ -37,8 +37,9 @@ def GetAllFileName() -> list[str]:
     return glob.glob(os.path.join(tcm.testCaseDirec, "*"))
 
 messages = []
-def ExacSolve1() -> None:
+def ExacSolve1() -> bool:
     """Solve1.pyを実行して結果を記録する"""
+    ret = False
     try:
         import Solve1
         Solve1.print = DebugPrint
@@ -48,10 +49,13 @@ def ExacSolve1() -> None:
         fileName = os.path.basename(fl.GetInputFileName())
         errMessage = fileName + " Solve1\n" + str(e)
         messages.append(errMessage)
+        ret = True
     if "Solve1" in sys.modules: del sys.modules["Solve1"]
+    return ret
 
-def ExacSolve2() -> None:
+def ExacSolve2() -> bool:
     """Solve2.pyを実行して結果を記録する"""
+    ret = False
     try:
         import Solve2
         Solve2.print = DebugPrint
@@ -61,7 +65,9 @@ def ExacSolve2() -> None:
         fileName = os.path.basename(fl.GetInputFileName())
         errMessage = fileName + " Solve2\n" + str(e)
         messages.append(errMessage)
+        ret = True
     if "Solve2" in sys.modules: del sys.modules["Solve2"]
+    return ret
 
 def InitResult() -> None:
     """実行結果の出力先ディレクトリを初期化する"""
@@ -83,31 +89,47 @@ def MakeResultFile() -> None:
         print(len(messages), "error found.", file=f)
         print(*messages, sep="\n", file=f)
 
+def StandardOutput() -> None:
+    """結果のサマリを標準出力する"""
+    global ACcount, WAcount, REcount
+    print("AC |", ACcount)
+    print("WA |", WAcount)
+    print("RE |", REcount)
+
 result = []
+ACcount, WAcount, REcount = 0, 0, 0
 def main() -> None:
+    global ACcount, WAcount, REcount
     InitResult()
     allTestCaseName = GetAllFileName()
 
     for testCaseName in allTestCaseName:
+        errFlg = False
         #テストケース実行
         fl.SetFileName(testCaseName, "Solve1")
         fl.SetFileContents()
-        ExacSolve1()
+        errFlg |= ExacSolve1()
 
         fl.SetFileName(testCaseName, "Solve2")
         fl.SetFileContents()
-        ExacSolve2()
+        errFlg |= ExacSolve2()
 
         #比較
         path = os.path.join(outPath, fl.GetOutputFilePath(), "*")
         file = glob.glob(path)
-        if len(file) != 2:
+
+        if errFlg: #エラーが起こった時
+            REcount += 1
+        elif len(file) != 2: #ここに入ることは基本ないはず
             pass
-        elif not filecmp.cmp(*file):
+        elif not filecmp.cmp(*file): #出力に違いがあった時
             fileName = os.path.basename(testCaseName)
             result.append(fileName)
-
+            WAcount += 1
+        else:
+            ACcount += 1
     MakeResultFile()
+    StandardOutput()
 
 if __name__ == "__main__":
     main()
