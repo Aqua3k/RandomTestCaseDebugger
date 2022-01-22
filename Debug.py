@@ -38,7 +38,10 @@ def GetAllFileName() -> list[str]:
 
 messages = []
 def ExacSolve1() -> bool:
-    """Solve1.pyを実行して結果を記録する"""
+    """Solve1.pyを実行して結果を記録する
+    戻り値: エラーが起こった時 True
+            それ以外 False
+    """
     ret = False
     try:
         import Solve1
@@ -54,7 +57,10 @@ def ExacSolve1() -> bool:
     return ret
 
 def ExacSolve2() -> bool:
-    """Solve2.pyを実行して結果を記録する"""
+    """Solve2.pyを実行して結果を記録する
+    戻り値: エラーが起こった時 True
+            それ以外 False
+    """
     ret = False
     try:
         import Solve2
@@ -89,20 +95,18 @@ def MakeResultFile() -> None:
         print(len(messages), "error found.", file=f)
         print(*messages, sep="\n", file=f)
 
-def StandardOutput() -> None:
+def StandardOutput(ACcount: int, WAcount: int, REcount: int) -> None:
     """結果のサマリを標準出力する"""
-    global ACcount, WAcount, REcount
     print("AC |", ACcount)
     print("WA |", WAcount)
     print("RE |", REcount)
 
 result = []
-ACcount, WAcount, REcount = 0, 0, 0
 def main() -> None:
-    global ACcount, WAcount, REcount
     InitResult()
     allTestCaseName = GetAllFileName()
 
+    ACcount, WAcount, REcount = 0, 0, 0
     for testCaseName in allTestCaseName:
         errFlg = False
         #テストケース実行
@@ -129,7 +133,7 @@ def main() -> None:
         else:
             ACcount += 1
     MakeResultFile()
-    StandardOutput()
+    StandardOutput(ACcount, WAcount, REcount)
 
 if __name__ == "__main__":
     main()
