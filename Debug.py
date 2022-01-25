@@ -9,6 +9,8 @@ import glob
 import os
 import shutil
 import filecmp
+from difflib import HtmlDiff
+from MyLib import *
 from typing import Any
 
 import TestCaseMaker as tcm
@@ -16,6 +18,7 @@ import FileLib as fl
 
 outPath = "out"
 outFile = "Result"
+htmlPath = "html"
 
 ####################################
 #Debug用の入出力
@@ -95,6 +98,38 @@ def MakeResultFile() -> None:
         print(len(messages), "error found.", file=f)
         print(*messages, sep="\n", file=f)
 
+def MakeHTML(path1: str, path2: str) -> None:
+    """HTMLファイル作成"""
+
+    cssFileName = "css_tmp.css" # とりあえずここに置いておく TODO:後でファイルの先頭とかに移す
+    css = "<link rel=\"stylesheet\" type=\"text/css\" href=\"{fileName}\">"
+
+    with open(path1,'r') as f: file1 = f.readlines()
+    with open(path2,'r') as f: file2 = f.readlines()
+
+    # 比較結果HTMLを作成
+    diff = HtmlDiff()
+    diffStr = diff.make_file(file1, file2)
+    cssLink = css.format(fileName=cssFileName)
+    tmp = diffStr.split("\n")
+    tmp.insert(tmp.index("<head>") + 1, cssLink) #<head>の中にcssのリンク用の文字列を放り込む
+    diffStr = "\n".join(tmp)
+
+    name = fl.GetOutputFilePath() + ".html"
+    with open(os.path.join(htmlPath, name) ,'w') as html:
+        html.writelines(diffStr)
+
+def MakeHTMLResult() -> None:
+    """結果のHTMLファイル作成"""
+    bodyList = []
+    files = glob.glob(os.path.join(htmlPath, "*.html"))
+    for file in files: bodyList.append(HTMLLinkStr.format(path=file, string=file))
+    body = "\n".join(bodyList)
+    
+    resultFileName = "result.html"
+    with open(resultFileName ,'w') as html:
+        html.writelines(HTMLBody.format(body=body, title="test"))
+
 def StandardOutput(ACcount: int, WAcount: int, REcount: int) -> None:
     """結果のサマリを標準出力する"""
     print("AC |", ACcount)
@@ -122,6 +157,9 @@ def main() -> None:
         path = os.path.join(outPath, fl.GetOutputFilePath(), "*")
         file = glob.glob(path)
 
+        #HTMLファイル作成
+        MakeHTML(*file)
+
         if errFlg: #エラーが起こった時
             REcount += 1
         elif len(file) != 2: #ここに入ることは基本ないはず
@@ -134,6 +172,7 @@ def main() -> None:
             ACcount += 1
     MakeResultFile()
     StandardOutput(ACcount, WAcount, REcount)
+    MakeHTMLResult()
 
 if __name__ == "__main__":
     main()

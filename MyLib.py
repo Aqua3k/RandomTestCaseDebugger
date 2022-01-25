@@ -49,3 +49,18 @@ class UnionFind():
 
     def __str__(self):
         return '\n'.join('{}: {}'.format(r, self.members(r)) for r in self.roots())
+
+
+HTMLLinkStr = "<a href=\"{path}\">{string}</a><br>"
+
+HTMLBody = '''
+<html>
+<head>
+<meta charset="utf-8">
+<title>{title}</title>
+</head>
+<body>
+{body}
+</body>
+</html>
+'''
