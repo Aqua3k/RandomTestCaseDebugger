@@ -10,7 +10,7 @@ import os
 import shutil
 import filecmp
 from difflib import HtmlDiff
-from MyLib import *
+from template import *
 from typing import Any
 
 import TestCaseMaker as tcm
@@ -102,7 +102,7 @@ def MakeHTML(path1: str, path2: str) -> None:
     """HTMLファイル作成"""
 
     cssFileName = "css_tmp.css" # とりあえずここに置いておく TODO:後でファイルの先頭とかに移す
-    css = "<link rel=\"stylesheet\" type=\"text/css\" href=\"{fileName}\">"
+    css = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.min.css">'
 
     with open(path1,'r') as f: file1 = f.readlines()
     with open(path2,'r') as f: file2 = f.readlines()
