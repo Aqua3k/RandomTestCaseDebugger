@@ -50,20 +50,37 @@ class UnionFind():
     def __str__(self):
         return '\n'.join('{}: {}'.format(r, self.members(r)) for r in self.roots())
 
-def GetIndex(caseName):
+def GetIndex(caseName: str) -> int:
+    """テストケースの名前からindexのみを取り出す"""
     retStr = ""
     for s in caseName:
         if "0" <= s <= "9": retStr += s
-    return int(s)
+    return int(retStr)
 
 class ResultStatus():
-    def __init__(self, caseName, status, errFlg1, errFlg2, errMsg1=None, errMsg2=None):
-        self.idx = GetIndex(caseName)
-        self.caseName = caseName
-        self.status = status
-        self.errFlg1 = errFlg1
-        self.errFlg2 = errFlg2
-        self.errMsg1 = errMsg1
-        self.errMsg2 = errMsg2
-    def __repr__(self): #__repr__を定義しておくとクラスのままソートできるらしい
-        return repr(self.idx)
+    """実行結果の情報を管理するクラス"""
+    def __init__(self):
+        self.idx = ""
+        self.caseName = ""
+        self.result = ""
+        self.errFlg1 = False
+        self.errFlg2 = False
+        self.errMsg1 = ""
+        self.errMsg2 = ""
+    def IsErrorOccurred(self) -> bool:
+        """エラーが起こったかどうか"""
+        return self.errFlg1 or self.errFlg2
+    def Check(self) -> bool:
+        """すべてのメンバが更新されたかチェックする
+        Note: errFlg1,2はもともとFlaseで初期化してあるのでそれ以外のメンバのみをチェック"""
+        allMembers = [self.idx, self.caseName, self.result, self.errMsg1, self.errMsg2]
+        for member in allMembers:
+            if str(member) == "": return False
+        return True
+    def __lt__(self, other) -> bool:
+        """__lt__を定義しておくとクラスのままソートが可能になる"""
+        return self.idx < other.idx
+    def __str__(self) -> str:
+        """デバッグ用"""
+        allMembers = [self.idx, self.caseName, self.result, self.errFlg1, self.errFlg2, self.errMsg1, self.errMsg2]
+        return " ".join( list(map(str, allMembers)) ) + "\n"
