@@ -98,37 +98,41 @@ def MakeResultFile() -> None:
         print(len(messages), "error found.", file=f)
         print(*messages, sep="\n", file=f)
 
+def InitHTML() -> None:
+    """HTMLの出力先ディレクトリを初期化する"""
+    shutil.rmtree(htmlPath, ignore_errors=True)
+    os.mkdir(htmlPath)
+
+def InsertTextIntoHTMLHead(HTMLStr: str, text: str) -> str:
+    """HTMLの文字列のHeadの中に別の文字列を挿入する"""
+    HTMLStrList = HTMLStr.split("\n")
+    HTMLStrList.insert(HTMLStrList.index("<head>") + 1, text)
+    return "\n".join(HTMLStrList)
+
 def MakeHTML(path1: str, path2: str) -> None:
     """HTMLファイル作成"""
-
-    cssFileName = "css_tmp.css" # とりあえずここに置いておく TODO:後でファイルの先頭とかに移す
-    css = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.min.css">'
-
     with open(path1,'r') as f: file1 = f.readlines()
     with open(path2,'r') as f: file2 = f.readlines()
 
     # 比較結果HTMLを作成
     diff = HtmlDiff()
-    diffStr = diff.make_file(file1, file2)
-    cssLink = css.format(fileName=cssFileName)
-    tmp = diffStr.split("\n")
-    tmp.insert(tmp.index("<head>") + 1, cssLink) #<head>の中にcssのリンク用の文字列を放り込む
-    diffStr = "\n".join(tmp)
-
-    name = fl.GetOutputFilePath() + ".html"
-    with open(os.path.join(htmlPath, name) ,'w') as html:
+    diffStr = InsertTextIntoHTMLHead(diff.make_file(file1, file2), cssLink)
+    path = fl.GetOutputFilePath() + ".html"
+    with open(os.path.join(htmlPath, path) ,'w') as html:
         html.writelines(diffStr)
 
 def MakeHTMLResult() -> None:
     """結果のHTMLファイル作成"""
     bodyList = []
     files = glob.glob(os.path.join(htmlPath, "*.html"))
-    for file in files: bodyList.append(HTMLLinkStr.format(path=file, string=file))
+    for file in files: bodyList.append(HTMLLinkStr.format(path=file, string=os.path.basename(file)))
     body = "\n".join(bodyList)
     
     resultFileName = "result.html"
     with open(resultFileName ,'w') as html:
-        html.writelines(HTMLBody.format(body=body, title="test"))
+        text = HTMLText.format(body=body, title="Result")
+        text = InsertTextIntoHTMLHead(text, cssLink)
+        html.writelines(text)
 
 def StandardOutput(ACcount: int, WAcount: int, REcount: int) -> None:
     """結果のサマリを標準出力する"""
@@ -139,6 +143,7 @@ def StandardOutput(ACcount: int, WAcount: int, REcount: int) -> None:
 result = []
 def main() -> None:
     InitResult()
+    InitHTML()
     allTestCaseName = GetAllFileName()
 
     ACcount, WAcount, REcount = 0, 0, 0

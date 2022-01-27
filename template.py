@@ -1,6 +1,8 @@
 HTMLLinkStr = '<a href="{path}">{string}</a><br>'
 
-HTMLBody = '''
+cssLink = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.min.css">'
+
+HTMLText = '''
 <html>
 <head>
 <meta charset="utf-8">

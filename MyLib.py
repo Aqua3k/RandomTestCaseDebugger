@@ -49,3 +49,21 @@ class UnionFind():
 
     def __str__(self):
         return '\n'.join('{}: {}'.format(r, self.members(r)) for r in self.roots())
+
+def GetIndex(caseName):
+    retStr = ""
+    for s in caseName:
+        if "0" <= s <= "9": retStr += s
+    return int(s)
+
+class ResultStatus():
+    def __init__(self, caseName, status, errFlg1, errFlg2, errMsg1=None, errMsg2=None):
+        self.idx = GetIndex(caseName)
+        self.caseName = caseName
+        self.status = status
+        self.errFlg1 = errFlg1
+        self.errFlg2 = errFlg2
+        self.errMsg1 = errMsg1
+        self.errMsg2 = errMsg2
+    def __repr__(self): #__repr__を定義しておくとクラスのままソートできるらしい
+        return repr(self.idx)
