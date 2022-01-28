@@ -41,7 +41,7 @@ def GetAllFileName() -> list[str]:
     return glob.glob(os.path.join(tcm.testCaseDirec, "*"))
 
 messages = []
-def ExacSolve1(status) -> ResultStatus:
+def ExacSolve1(status: ResultStatus) -> None:
     """Solve1.pyを実行して実行結果を引数で与えられたクラスに記録する"""
     errFlg = False
     errMsg = None
@@ -57,7 +57,7 @@ def ExacSolve1(status) -> ResultStatus:
     status.errFlg1 = errFlg
     status.errMsg1 = errMsg
 
-def ExacSolve2(status) -> bool:
+def ExacSolve2(status: ResultStatus) -> None:
     """Solve2.pyを実行して実行結果を引数で与えられたクラスに記録する"""
     errFlg = False
     errMsg = None
@@ -96,6 +96,7 @@ def MakeResultFile(AllStatus: list[ResultStatus]) -> None:
             diffList.append(status.caseName)
         elif status.result == "AC":
             ACcount += 1
+        else: assert 0, "Error: Unkown status found."
     
     f = open("result.txt", 'w')
     print(noDifference if WAcount == 0 else differenceFound.format(diffNum=WAcount), file=f)
@@ -131,10 +132,12 @@ def MakeHTML(path1: str, path2: str) -> None:
 def MakeHTMLResult(AllStatus) -> None:
     """結果のHTMLファイル作成"""
     bodyList = []
-    files = glob.glob(os.path.join(htmlPath, "*.html"))
-    for file in files: bodyList.append(HTMLLinkStr.format(path=file, string=os.path.basename(file)))
+    for status in AllStatus:
+        if not status.IsErrorOccurred():
+            HTMLPath = os.path.join(htmlPath, "case" + str(status.idx) + ".html")
+            bodyList.append(HTMLLinkStr.format(path=HTMLPath, string=os.path.basename(HTMLPath)))
+
     body = "\n".join(bodyList)
-    
     resultFileName = "result.html"
     with open(resultFileName ,'w') as html:
         text = HTMLText.format(body=body, title="Result")
