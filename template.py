@@ -13,6 +13,10 @@ HTMLLinkStr = '<a href="{path}">{string}</a><br>'
 
 cssLink = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.min.css">'
 
+Table = '<table border="{border}">{body}</table>'
+TableBody = '<tr><th>{text1}</th><th bgcolor={color}>{text2}</th><th>{text3}</th></tr>'
+HTMLFont = '<font size="{size}" >{text}</font>'
+
 HTMLText = '''
 <html>
 <head>

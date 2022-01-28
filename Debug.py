@@ -12,6 +12,7 @@ import filecmp
 from difflib import HtmlDiff
 from template import *
 from typing import Any
+import traceback
 
 import TestCaseMaker as tcm
 import FileLib as fl
@@ -50,8 +51,8 @@ def ExacSolve1(status: ResultStatus) -> None:
         Solve1.print = DebugPrint
         Solve1.input = DebugInput
         Solve1.main()
-    except Exception as e:
-        errMsg = str(e)
+    except:
+        errMsg = traceback.format_exc()
         errFlg = True
     if "Solve1" in sys.modules: del sys.modules["Solve1"]
     status.errFlg1 = errFlg
@@ -66,8 +67,8 @@ def ExacSolve2(status: ResultStatus) -> None:
         Solve2.print = DebugPrint
         Solve2.input = DebugInput
         Solve2.main()
-    except Exception as e:
-        errMsg = str(e)
+    except:
+        errMsg = traceback.format_exc()
         errFlg = True
     if "Solve2" in sys.modules: del sys.modules["Solve2"]
     status.errFlg2 = errFlg
@@ -117,7 +118,7 @@ def InsertTextIntoHTMLHead(HTMLStr: str, text: str) -> str:
     HTMLStrList.insert(HTMLStrList.index("<head>") + 1, text)
     return "\n".join(HTMLStrList)
 
-def MakeHTML(path1: str, path2: str) -> None:
+def MakeDiffHTML(path1: str, path2: str) -> None:
     """HTMLファイル作成"""
     with open(path1,'r') as f: file1 = f.readlines()
     with open(path2,'r') as f: file2 = f.readlines()
@@ -126,23 +127,43 @@ def MakeHTML(path1: str, path2: str) -> None:
     diff = HtmlDiff()
     diffStr = InsertTextIntoHTMLHead(diff.make_file(file1, file2), cssLink)
     path = fl.GetOutputFilePath() + ".html"
-    with open(os.path.join(htmlPath, path) ,'w') as html:
+    with open(os.path.join(htmlPath, path) ,'w', encoding='utf-8', newline='\n') as html:
         html.writelines(diffStr)
 
-def MakeHTMLResult(AllStatus) -> None:
-    """結果のHTMLファイル作成"""
+def MakeErrorHTML(status: ResultStatus) -> None:
+    """エラーメッセージのHTMLファイル作成"""
     bodyList = []
-    for status in AllStatus:
-        if not status.IsErrorOccurred():
-            HTMLPath = os.path.join(htmlPath, "case" + str(status.idx) + ".html")
-            bodyList.append(HTMLLinkStr.format(path=HTMLPath, string=os.path.basename(HTMLPath)))
+    if status.errFlg1:
+        bodyList.append("Error occured in Solve1.py" + "<br>")
+        bodyList.append(status.errMsg1.replace("\n", "<br>").replace(" ", "&nbsp;"))
+    if status.errFlg2:
+        bodyList.append("Error occured in Solve2.py" + "<br>")
+        bodyList.append(status.errMsg2.replace("\n", "<br>").replace(" ", "&nbsp;"))
+    with open(os.path.join(htmlPath, fl.GetOutputFilePath() + ".html") ,'w',\
+         encoding='utf-8', newline='\n') as html:
+        html.writelines(HTMLText.format(title="Error Message", body="\n".join(bodyList)))
 
-    body = "\n".join(bodyList)
+def MakeHTMLResult(AllStatus: list[ResultStatus]) -> None:
+    """結果のHTMLファイル作成"""
+    textList = []
+    header = TableBody.format(text1="Test Case Name", color="", text2="Result", text3="Result Link")
+    textList.append(header)
+    for status in AllStatus:
+        if   status.result == "AC": color = "lime"
+        elif status.result == "WA": color = "yellow"
+        else:                       color = "violet"
+        testCasePath = os.path.join(tcm.testCaseDirec, status.caseName)
+        testCaseLink = HTMLLinkStr.format(path=testCasePath, string=status.caseName)
+        HTMLPath = os.path.join(htmlPath, "case" + str(status.idx) + ".html")
+        HTMLLink = HTMLLinkStr.format(path=HTMLPath, string="Link")
+        lineStr = TableBody.format(text1=testCaseLink, color=color, text2=status.result, text3=HTMLLink)
+        textList.append(lineStr)
+
+    tableHTML = Table.format(border=3, body="\n".join(textList))
     resultFileName = "result.html"
-    with open(resultFileName ,'w') as html:
-        text = HTMLText.format(body=body, title="Result")
-        text = InsertTextIntoHTMLHead(text, cssLink)
-        html.writelines(text)
+    with open(resultFileName ,'w', encoding='utf-8', newline='\n') as html:
+        text = HTMLText.format(body=tableHTML, title="Result")
+        html.writelines(InsertTextIntoHTMLHead(text, cssLink))
 
 def StandardOutput(ACcount: int, WAcount: int, REcount: int) -> None:
     """結果のサマリを標準出力する"""
@@ -183,19 +204,19 @@ def ExacTestCaseAndRecordResult(testCasePath: str) -> ResultStatus:
     if status.IsErrorOccurred(): #エラーが発生した時はdiffのHTMLファイルは作れない
         status.result = "RE"
         assert status.Check(), "Error: Some 'ResultStatus' class members have initial value."
+        MakeErrorHTML(status)
         return status
     elif len(files) != 2:         pass #Getしたファイルの数が2個ではなかった場合(基本ありえない)
     elif not filecmp.cmp(*files): status.result = "WA"
     else:                         status.result = "AC"
 
-    #HTMLファイル作成
-    MakeHTML(*files)
+    #比較結果HTMLファイル作成
+    MakeDiffHTML(*files)
     
     #全部のメンバに代入されたかチェック
     assert status.Check(), "Error: Some 'ResultStatus' class members have initial value."
     return status
 
-result = []
 def main() -> None:
     InitAll()
     AllStatus = []
