@@ -1,5 +1,7 @@
 # もし生成用の関数群を別ファイルに移すならここかな？
 
+from bisect import insort_left
+
 #UnionFind
 class UnionFind():
     def __init__(self, n):
@@ -63,6 +65,7 @@ class ResultStatus():
         self.idx = ""
         self.caseName = ""
         self.result = ""
+        self.outPaths = []
         self.errFlg1 = False
         self.errFlg2 = False
         self.errMsg1 = ""
@@ -96,7 +99,7 @@ class AllResultStatus():
 
     def RegisterResultStatus(self, status: ResultStatus) -> None:
         """ResultStatusを登録"""
-        self._allResultStatus.append(status)
+        insort_left(self._allResultStatus, status)
         if status.result == 'AC':
             self.ACcount += 1
         elif status.result == 'WA':
@@ -107,7 +110,7 @@ class AllResultStatus():
     def rawAllResultStatus(self) -> list[ResultStatus]:
         """登楼したResultStatusのリストを返す"""
         # index順でソート(case2.txtよりcase10.txtが先に出力される問題対策)
-        return sorted(self._allResultStatus)
+        return self._allResultStatus
 
     def __iter__(self):
         self._i = 0
