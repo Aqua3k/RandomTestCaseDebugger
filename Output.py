@@ -11,7 +11,6 @@ from template import (
     HTMLText, Table, HTMLLinkStr, TableBody, cssLink
 )
 
-
 class Output(ABC):
     """差分結果を出力する抽象クラス"""
 
@@ -19,13 +18,12 @@ class Output(ABC):
         self._allStatus = allStatus
 
     @abstractmethod
-    def clear(self) -> None:
+    def Clear(self) -> None:
         pass
 
     @abstractmethod
-    def output(self) -> None:
+    def Output(self) -> None:
         pass
-
 
 class StandardOutput(Output):
     """差分結果を標準出力するクラス"""
@@ -34,17 +32,16 @@ class StandardOutput(Output):
         super().__init__(allStatus)
 
     @abstractmethod
-    def clear(self) -> None:
+    def Clear(self) -> None:
         """削除するファイルはない"""
         pass
 
-    def output(self) -> None:
+    def Output(self) -> None:
         """結果のサマリを標準出力する"""
 
         print(f"AC | {self._allStatus.ACcount}\n"
               f"WA | {self._allStatus.WAcount}\n"
               f"RE | {self._allStatus.REcount}")
-
 
 class HTMLOutput(Output):
     """差分結果をHTMLに出力するクラス"""
@@ -54,12 +51,12 @@ class HTMLOutput(Output):
     def __init__(self, allStatus: AllResultStatus) -> None:
         super().__init__(allStatus)
 
-    def clear(self) -> None:
+    def Clear(self) -> None:
         """既存の出力ファイルを削除する"""
         shutil.rmtree(__class__.htmlPath, ignore_errors=True)
         os.mkdir(__class__.htmlPath)
 
-    def output(self) -> None:
+    def Output(self) -> None:
         self._MakeHTMLResult()
         for status in self._allStatus:
             if status.result == 'RE':
@@ -72,10 +69,10 @@ class HTMLOutput(Output):
         bodyList = []
         if status.errFlg1:
             bodyList.append('Error occured in Solve1.py<br>')
-            bodyList.append(__class__.toHTML(status.errMsg1))
+            bodyList.append(__class__.ToHTML(status.errMsg1))
         if status.errFlg2:
             bodyList.append('Error occured in Solve2.py<br>')
-            bodyList.append(__class__.toHTML(status.errMsg2))
+            bodyList.append(__class__.ToHTML(status.errMsg2))
 
         outputPath = os.path.join(__class__.htmlPath, fl.GetOutputFilePath() + '.html')
         with open(outputPath, 'w') as html:
@@ -127,10 +124,9 @@ class HTMLOutput(Output):
             html.writelines(self._InsertTextIntoHTMLHead(text, cssLink))
 
     @staticmethod
-    def toHTML(text: str) -> str:
+    def ToHTML(text: str) -> str:
         """文字列をHTMLに簡易的に変換する"""
         return text.replace('\n', '<br>').replace(' ', '&nbsp;')
-
 
 class FileOutput(Output):
     """差分結果をファイル出力するクラス"""
@@ -140,12 +136,12 @@ class FileOutput(Output):
     def __init__(self, allStatus: AllResultStatus) -> None:
         super().__init__(allStatus)
 
-    def clear(self) -> None:
+    def Clear(self) -> None:
         """result.txtを削除する"""
         if os.path.isfile(__class__.resultFile):
             os.remove(__class__.resultFile)
 
-    def output(self) -> None:
+    def Output(self) -> None:
         """実行結果ファイルを作成する"""
 
         ACcount, WAcount, REcount = 0, 0, 0

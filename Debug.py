@@ -121,12 +121,12 @@ def main() -> None:
         allResultStatus.RegisterResultStatus(status)
 
     std = StandardOutput(allResultStatus)
-    std.output()
+    std.Output()
     file = FileOutput(allResultStatus)
-    file.output()
+    file.Output()
     html = HTMLOutput(allResultStatus)
-    html.clear()
-    html.output()
+    html.Clear()
+    html.Output()
 
 if __name__ == "__main__":
     main()
