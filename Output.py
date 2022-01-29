@@ -31,7 +31,6 @@ class StandardOutput(Output):
     def __init__(self, allStatus: AllResultStatus) -> None:
         super().__init__(allStatus)
 
-    @abstractmethod
     def Clear(self) -> None:
         """削除するファイルはない"""
         pass
