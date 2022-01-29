@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from MyLib import AllResultStatus
+from template import errorMessage, noDifference, differenceFound, noError, ErrorOccured
 
 
 class Output(ABC):
@@ -42,7 +43,33 @@ class FileOutput(Output):
     """差分結果をファイル出力するクラス"""
 
     def __init__(self, allStatus: AllResultStatus) -> None:
-        super().__init__()
+        super().__init__(allStatus)
 
     def output(self) -> None:
-        pass
+        """実行結果ファイルを作成する"""
+
+        ACcount, WAcount, REcount = 0, 0, 0
+        diffList, errList = [], []
+        for status in self._allStatus:
+            if status.IsErrorOccurred():
+                REcount += 1
+                if status.errFlg1:
+                    errList.append(errorMessage.format(fileName=status.caseName,
+                                                       progName='Solve1.py', errorMessage=status.errMsg1))
+                if status.errFlg2:
+                    errList.append(errorMessage.format(fileName=status.caseName,
+                                                       progName='Solve2.py', errorMessage=status.errMsg2))
+            elif status.result == 'WA':
+                WAcount += 1
+                diffList.append(status.caseName)
+            elif status.result == 'AC':
+                ACcount += 1
+            else:
+                assert 0, 'Error: Unkown status found.'
+
+        f = open('result.txt', 'w')
+        print(noDifference if WAcount == 0 else differenceFound.format(diffNum=WAcount), file=f)
+        print('\n'.join(diffList), file=f)
+        print(file=f)
+        print(noError if REcount == 0 else ErrorOccured.format(errNum=REcount), file=f)
+        print('\n'.join(errList), file=f)

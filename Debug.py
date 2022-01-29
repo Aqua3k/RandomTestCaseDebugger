@@ -17,7 +17,7 @@ import traceback
 import TestCaseMaker as tcm
 import FileLib as fl
 from MyLib import GetIndex, ResultStatus, AllResultStatus
-from Output import StandardOutput
+from Output import StandardOutput, FileOutput
 
 outPath = "out"
 outFile = "Result"
@@ -80,33 +80,6 @@ def InitResult() -> None:
     shutil.rmtree(outPath, ignore_errors=True)
     os.mkdir(outPath)
 
-def MakeResultFile(AllStatus: list[ResultStatus]) -> None:
-    """実行結果ファイルを作成する"""
-    ACcount, WAcount, REcount = 0, 0, 0
-    diffList, errList = [], []
-    for status in AllStatus:
-        if status.IsErrorOccurred():
-            REcount += 1
-            if status.errFlg1:
-                errList.append(errorMessage.format(fileName=status.caseName,\
-                     progName="Solve1.py", errorMessage=status.errMsg1))
-            if status.errFlg2:
-                errList.append(errorMessage.format(fileName=status.caseName,\
-                     progName="Solve2.py", errorMessage=status.errMsg2))
-        elif status.result == "WA":
-            WAcount += 1
-            diffList.append(status.caseName)
-        elif status.result == "AC":
-            ACcount += 1
-        else: assert 0, "Error: Unkown status found."
-
-    f = open("result.txt", 'w')
-    print(noDifference if WAcount == 0 else differenceFound.format(diffNum=WAcount), file=f)
-    print("\n".join(diffList), file=f)
-    print(file=f)
-    print(noError if REcount == 0 else ErrorOccured.format(errNum=REcount), file=f)
-    print("\n".join(errList), file=f)
-
 def InitHTML() -> None:
     """HTMLの出力先ディレクトリを初期化する"""
     shutil.rmtree(htmlPath, ignore_errors=True)
@@ -165,11 +138,6 @@ def MakeHTMLResult(AllStatus: list[ResultStatus]) -> None:
         text = HTMLText.format(body=tableHTML, title="Result")
         html.writelines(InsertTextIntoHTMLHead(text, cssLink))
 
-def OutputAllResult(AllStatus: list[ResultStatus]) -> None:
-    """結果出力のまとめ"""
-    MakeResultFile(AllStatus)
-    MakeHTMLResult(AllStatus)
-
 def InitAll():
     """初期化処理のまとめ
     Note: 必要な初期化処理が増えた時のために分離しておく"""
@@ -221,8 +189,10 @@ def main() -> None:
 
     std = StandardOutput(allResultStatus)
     std.output()
+    file = FileOutput(allResultStatus)
+    file.output()
 
-    OutputAllResult(allResultStatus.rawAllResultStatus())
+    MakeHTMLResult(allResultStatus.rawAllResultStatus())
 
 if __name__ == "__main__":
     main()

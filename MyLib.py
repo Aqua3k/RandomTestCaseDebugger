@@ -108,3 +108,15 @@ class AllResultStatus():
         """登楼したResultStatusのリストを返す"""
         # index順でソート(case2.txtよりcase10.txtが先に出力される問題対策)
         return sorted(self._allResultStatus)
+
+    def __iter__(self):
+        self._i = 0
+        return self
+
+    def __next__(self):
+        if self._i < len(self._allResultStatus):
+            status = self._allResultStatus[self._i]
+            self._i += 1
+            return status
+        else:
+            raise StopIteration
