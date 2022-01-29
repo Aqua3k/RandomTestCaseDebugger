@@ -84,3 +84,9 @@ class ResultStatus():
         """デバッグ用"""
         allMembers = [self.idx, self.caseName, self.result, self.errFlg1, self.errFlg2, self.errMsg1, self.errMsg2]
         return " ".join( list(map(str, allMembers)) ) + "\n"
+
+class AllResultStatus():
+    """ResultStatusのリスト用のクラス"""
+
+    def __init__(self, allResultStatus: list[ResultStatus]) -> None:
+        self._allResultStatus = allResultStatus
