@@ -16,7 +16,8 @@ import traceback
 
 import TestCaseMaker as tcm
 import FileLib as fl
-from MyLib import *
+from MyLib import GetIndex, ResultStatus, AllResultStatus
+from Output import StandardOutput
 
 outPath = "out"
 outFile = "Result"
@@ -98,14 +99,13 @@ def MakeResultFile(AllStatus: list[ResultStatus]) -> None:
         elif status.result == "AC":
             ACcount += 1
         else: assert 0, "Error: Unkown status found."
-    
+
     f = open("result.txt", 'w')
     print(noDifference if WAcount == 0 else differenceFound.format(diffNum=WAcount), file=f)
     print("\n".join(diffList), file=f)
     print(file=f)
     print(noError if REcount == 0 else ErrorOccured.format(errNum=REcount), file=f)
     print("\n".join(errList), file=f)
-    StandardOutput(ACcount, WAcount, REcount)
 
 def InitHTML() -> None:
     """HTMLの出力先ディレクトリを初期化する"""
@@ -165,12 +165,6 @@ def MakeHTMLResult(AllStatus: list[ResultStatus]) -> None:
         text = HTMLText.format(body=tableHTML, title="Result")
         html.writelines(InsertTextIntoHTMLHead(text, cssLink))
 
-def StandardOutput(ACcount: int, WAcount: int, REcount: int) -> None:
-    """結果のサマリを標準出力する"""
-    print("AC |", ACcount)
-    print("WA |", WAcount)
-    print("RE |", REcount)
-
 def OutputAllResult(AllStatus: list[ResultStatus]) -> None:
     """結果出力のまとめ"""
     MakeResultFile(AllStatus)
@@ -212,19 +206,23 @@ def ExacTestCaseAndRecordResult(testCasePath: str) -> ResultStatus:
 
     #比較結果HTMLファイル作成
     MakeDiffHTML(*files)
-    
+
     #全部のメンバに代入されたかチェック
     assert status.Check(), "Error: Some 'ResultStatus' class members have initial value."
     return status
 
 def main() -> None:
     InitAll()
-    AllStatus = []
+
+    allResultStatus = AllResultStatus()
     for testCasePath in GetAllFileName():
         status = ExacTestCaseAndRecordResult(testCasePath)
-        AllStatus.append(status)
-    SortedAllStatus = sorted(AllStatus) #index順でソート(case2.txtよりcase10.txtが先に出力される問題対策)
-    OutputAllResult(SortedAllStatus)
+        allResultStatus.RegisterResultStatus(status)
+
+    std = StandardOutput(allResultStatus)
+    std.output()
+
+    OutputAllResult(allResultStatus.rawAllResultStatus())
 
 if __name__ == "__main__":
     main()

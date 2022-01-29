@@ -21,7 +21,11 @@ class StandardOutput(Output):
         super().__init__(allStatus)
 
     def output(self) -> None:
-        pass
+        """結果のサマリを標準出力する"""
+
+        print(f"AC | {self._allStatus.ACcount}\n"
+              f"WA | {self._allStatus.WAcount}\n"
+              f"RE | {self._allStatus.REcount}")
 
 
 class HTMLOutput(Output):

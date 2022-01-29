@@ -88,5 +88,23 @@ class ResultStatus():
 class AllResultStatus():
     """ResultStatusのリスト用のクラス"""
 
-    def __init__(self, allResultStatus: list[ResultStatus]) -> None:
-        self._allResultStatus = allResultStatus
+    def __init__(self) -> None:
+        self._allResultStatus = []
+        self.ACcount = 0
+        self.WAcount = 0
+        self.REcount = 0
+
+    def RegisterResultStatus(self, status: ResultStatus) -> None:
+        """ResultStatusを登録"""
+        self._allResultStatus.append(status)
+        if status.result == 'AC':
+            self.ACcount += 1
+        elif status.result == 'WA':
+            self.WAcount += 1
+        else:
+            self.REcount += 1
+
+    def rawAllResultStatus(self) -> list[ResultStatus]:
+        """登楼したResultStatusのリストを返す"""
+        # index順でソート(case2.txtよりcase10.txtが先に出力される問題対策)
+        return sorted(self._allResultStatus)
