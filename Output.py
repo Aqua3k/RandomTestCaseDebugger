@@ -146,11 +146,9 @@ class FileOutput(Output):
     def Output(self) -> None:
         """実行結果ファイルを作成する"""
 
-        ACcount, WAcount, REcount = 0, 0, 0
         diffList, errList = [], []
         for status in self._allStatus:
             if status.IsErrorOccurred():
-                REcount += 1
                 if status.errFlg1:
                     errList.append(errorMessage.format(fileName=status.caseName,
                                                        progName='Solve1.py', errorMessage=status.errMsg1))
@@ -158,16 +156,15 @@ class FileOutput(Output):
                     errList.append(errorMessage.format(fileName=status.caseName,
                                                        progName='Solve2.py', errorMessage=status.errMsg2))
             elif status.result == 'WA':
-                WAcount += 1
                 diffList.append(status.caseName)
             elif status.result == 'AC':
-                ACcount += 1
+                pass
             else:
                 assert 0, 'Error: Unkown status found.'
 
         f = open(__class__.resultFile, 'w')
-        print(noDifference if WAcount == 0 else differenceFound.format(diffNum=WAcount), file=f)
+        print(noDifference if self._allStatus.WAcount == 0 else differenceFound.format(diffNum=self._allStatus.WAcount), file=f)
         print('\n'.join(diffList), file=f)
         print(file=f)
-        print(noError if REcount == 0 else ErrorOccured.format(errNum=REcount), file=f)
+        print(noError if self._allStatus.REcount == 0 else ErrorOccured.format(errNum=self._allStatus.REcount), file=f)
         print('\n'.join(errList), file=f)
