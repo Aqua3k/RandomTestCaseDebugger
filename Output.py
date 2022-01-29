@@ -19,6 +19,10 @@ class Output(ABC):
         self._allStatus = allStatus
 
     @abstractmethod
+    def clear(self) -> None:
+        pass
+
+    @abstractmethod
     def output(self) -> None:
         pass
 
@@ -28,6 +32,11 @@ class StandardOutput(Output):
 
     def __init__(self, allStatus: AllResultStatus) -> None:
         super().__init__(allStatus)
+
+    @abstractmethod
+    def clear(self) -> None:
+        """削除するファイルはない"""
+        pass
 
     def output(self) -> None:
         """結果のサマリを標準出力する"""
@@ -126,8 +135,15 @@ class HTMLOutput(Output):
 class FileOutput(Output):
     """差分結果をファイル出力するクラス"""
 
+    resultFile = 'result.txt'
+
     def __init__(self, allStatus: AllResultStatus) -> None:
         super().__init__(allStatus)
+
+    def clear(self) -> None:
+        """result.txtを削除する"""
+        if os.path.isfile(__class__.resultFile):
+            os.remove(__class__.resultFile)
 
     def output(self) -> None:
         """実行結果ファイルを作成する"""
@@ -151,7 +167,7 @@ class FileOutput(Output):
             else:
                 assert 0, 'Error: Unkown status found.'
 
-        f = open('result.txt', 'w')
+        f = open(__class__.resultFile, 'w')
         print(noDifference if WAcount == 0 else differenceFound.format(diffNum=WAcount), file=f)
         print('\n'.join(diffList), file=f)
         print(file=f)
