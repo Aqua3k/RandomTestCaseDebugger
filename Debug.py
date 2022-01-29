@@ -78,7 +78,8 @@ def InitResult() -> None:
 
 def InitAll():
     """初期化処理のまとめ
-    Note: 必要な初期化処理が増えた時のために分離しておく"""
+    Note: 必要な初期化処理が増えた時のために分離しておく
+    """
     InitResult()
 
 def ExacTestCaseAndRecordResult(testCasePath: str) -> ResultStatus:

@@ -109,7 +109,6 @@ class AllResultStatus():
 
     def rawAllResultStatus(self) -> list[ResultStatus]:
         """登楼したResultStatusのリストを返す"""
-        # index順でソート(case2.txtよりcase10.txtが先に出力される問題対策)
         return self._allResultStatus
 
     def __iter__(self):

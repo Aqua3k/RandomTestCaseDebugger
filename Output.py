@@ -19,10 +19,12 @@ class Output(ABC):
 
     @abstractmethod
     def Clear(self) -> None:
+        """既存の結果ファイルを削除する抽象メソッド"""
         pass
 
     @abstractmethod
     def Output(self) -> None:
+        """差分結果を出力する抽象メソッド"""
         pass
 
 class StandardOutput(Output):
@@ -56,6 +58,7 @@ class HTMLOutput(Output):
         os.mkdir(__class__.htmlPath)
 
     def Output(self) -> None:
+        """差分結果をHTMLとして出力する"""
         self._MakeHTMLResult()
         for status in self._allStatus:
             if status.result == 'RE':
