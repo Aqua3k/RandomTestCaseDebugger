@@ -1,3 +1,29 @@
-No difference.
+2 difference found.
+case3.txt
+case9.txt
 
-No error occured.
+3 error occured.
+case1.txt Solve1.py 
+Traceback (most recent call last):
+  File "c:\Users\c3ryu\Desktop\競技プログラミング\RandomTester\Debug.py", line 53, in ExacSolve1
+    Solve1.main()
+  File "c:\Users\c3ryu\Desktop\競技プログラミング\RandomTester\Solve1.py", line 6, in main
+    if n <= 4: k = 1/0
+ZeroDivisionError: division by zero
+
+case7.txt Solve1.py 
+Traceback (most recent call last):
+  File "c:\Users\c3ryu\Desktop\競技プログラミング\RandomTester\Debug.py", line 53, in ExacSolve1
+    Solve1.main()
+  File "c:\Users\c3ryu\Desktop\競技プログラミング\RandomTester\Solve1.py", line 6, in main
+    if n <= 4: k = 1/0
+ZeroDivisionError: division by zero
+
+case10.txt Solve1.py 
+Traceback (most recent call last):
+  File "c:\Users\c3ryu\Desktop\競技プログラミング\RandomTester\Debug.py", line 53, in ExacSolve1
+    Solve1.main()
+  File "c:\Users\c3ryu\Desktop\競技プログラミング\RandomTester\Solve1.py", line 6, in main
+    if n <= 4: k = 1/0
+ZeroDivisionError: division by zero
+

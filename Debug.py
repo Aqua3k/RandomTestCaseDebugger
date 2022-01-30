@@ -10,12 +10,14 @@ import os
 import shutil
 import filecmp
 from typing import Any
+import traceback
 
 import TestCaseMaker as tcm
 import FileLib as fl
+from MyLib import GetIndex, ResultStatus, AllResultStatus
+from Output import StandardOutput, FileOutput, HTMLOutput
 
 outPath = "out"
-outFile = "Result"
 
 ####################################
 #Debug用の入出力
@@ -37,103 +39,95 @@ def GetAllFileName() -> list[str]:
     return glob.glob(os.path.join(tcm.testCaseDirec, "*"))
 
 messages = []
-def ExacSolve1() -> bool:
-    """Solve1.pyを実行して結果を記録する
-    戻り値: エラーが起こった時 True
-            それ以外 False
-    """
-    ret = False
+def ExacSolve1(status: ResultStatus) -> None:
+    """Solve1.pyを実行して実行結果を引数で与えられたクラスに記録する"""
+    errFlg = False
+    errMsg = None
     try:
         import Solve1
         Solve1.print = DebugPrint
         Solve1.input = DebugInput
         Solve1.main()
-    except Exception as e:
-        fileName = os.path.basename(fl.GetInputFileName())
-        errMessage = fileName + " Solve1\n" + str(e)
-        messages.append(errMessage)
-        ret = True
+    except:
+        errMsg = traceback.format_exc()
+        errFlg = True
     if "Solve1" in sys.modules: del sys.modules["Solve1"]
-    return ret
+    status.errFlg1 = errFlg
+    status.errMsg1 = errMsg
 
-def ExacSolve2() -> bool:
-    """Solve2.pyを実行して結果を記録する
-    戻り値: エラーが起こった時 True
-            それ以外 False
-    """
-    ret = False
+def ExacSolve2(status: ResultStatus) -> None:
+    """Solve2.pyを実行して実行結果を引数で与えられたクラスに記録する"""
+    errFlg = False
+    errMsg = None
     try:
         import Solve2
         Solve2.print = DebugPrint
         Solve2.input = DebugInput
         Solve2.main()
-    except Exception as e:
-        fileName = os.path.basename(fl.GetInputFileName())
-        errMessage = fileName + " Solve2\n" + str(e)
-        messages.append(errMessage)
-        ret = True
+    except:
+        errMsg = traceback.format_exc()
+        errFlg = True
     if "Solve2" in sys.modules: del sys.modules["Solve2"]
-    return ret
+    status.errFlg2 = errFlg
+    status.errMsg2 = errMsg
 
 def InitResult() -> None:
     """実行結果の出力先ディレクトリを初期化する"""
     shutil.rmtree(outPath, ignore_errors=True)
     os.mkdir(outPath)
 
-def MakeResultFile() -> None:
-    """実行結果ファイルを作成する"""
-    f = open("result.txt", 'w')
-    if not len(result):
-        print("No difference.", file=f)
-    else:
-        print(len(result), "difference found.", file=f)
-        print(*result, sep="\n", file=f)
-    print(file=f)
-    if not len(messages):
-        print("No error occured.", file=f)
-    else:
-        print(len(messages), "error found.", file=f)
-        print(*messages, sep="\n", file=f)
-
-def StandardOutput(ACcount: int, WAcount: int, REcount: int) -> None:
-    """結果のサマリを標準出力する"""
-    print("AC |", ACcount)
-    print("WA |", WAcount)
-    print("RE |", REcount)
-
-result = []
-def main() -> None:
+def InitAll():
+    """初期化処理のまとめ
+    Note: 必要な初期化処理が増えた時のために分離しておく
+    """
     InitResult()
-    allTestCaseName = GetAllFileName()
 
-    ACcount, WAcount, REcount = 0, 0, 0
-    for testCaseName in allTestCaseName:
-        errFlg = False
-        #テストケース実行
-        fl.SetFileName(testCaseName, "Solve1")
-        fl.SetFileContents()
-        errFlg |= ExacSolve1()
+def ExacTestCaseAndRecordResult(testCasePath: str) -> ResultStatus:
+    """引数で与えられたテストケースを実行して結果を記録"""
+    status = ResultStatus() #結果記録用のクラスを作成
+    name = os.path.basename(testCasePath)
+    status.caseName = name
+    status.idx = GetIndex(name)
 
-        fl.SetFileName(testCaseName, "Solve2")
-        fl.SetFileContents()
-        errFlg |= ExacSolve2()
+    #Solve1.py実行
+    fl.SetFileName(testCasePath, "Solve1")
+    fl.SetFileContents()
+    ExacSolve1(status)
+    #Solve2.py実行
+    fl.SetFileName(testCasePath, "Solve2")
+    fl.SetFileContents()
+    ExacSolve2(status)
 
-        #比較
-        path = os.path.join(outPath, fl.GetOutputFilePath(), "*")
-        file = glob.glob(path)
+    #比較対象のファイルをGet
+    files = glob.glob(os.path.join(outPath, fl.GetOutputFilePath(), "*"))
 
-        if errFlg: #エラーが起こった時
-            REcount += 1
-        elif len(file) != 2: #ここに入ることは基本ないはず
-            pass
-        elif not filecmp.cmp(*file): #出力に違いがあった時
-            fileName = os.path.basename(testCaseName)
-            result.append(fileName)
-            WAcount += 1
-        else:
-            ACcount += 1
-    MakeResultFile()
-    StandardOutput(ACcount, WAcount, REcount)
+    status.outPaths = files
+
+    if status.IsErrorOccurred(): #エラーが発生した時はdiffのHTMLファイルは作れない
+        status.result = "RE"
+    elif len(files) != 2:         pass #Getしたファイルの数が2個ではなかった場合(基本ありえない)
+    elif not filecmp.cmp(*files): status.result = "WA"
+    else:                         status.result = "AC"
+
+    #全部のメンバに代入されたかチェック
+    assert status.Check(), "Error: Some 'ResultStatus' class members have initial value."
+    return status
+
+def main() -> None:
+    InitAll()
+
+    allResultStatus = AllResultStatus()
+    for testCasePath in GetAllFileName():
+        status = ExacTestCaseAndRecordResult(testCasePath)
+        allResultStatus.RegisterResultStatus(status)
+
+    std = StandardOutput(allResultStatus)
+    std.Output()
+    file = FileOutput(allResultStatus)
+    file.Output()
+    html = HTMLOutput(allResultStatus)
+    html.Clear()
+    html.Output()
 
 if __name__ == "__main__":
     main()
