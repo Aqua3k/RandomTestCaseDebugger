@@ -3,7 +3,6 @@ import shutil
 from difflib import HtmlDiff
 from abc import ABC, abstractmethod
 
-import FileLib as fl
 from MyLib import AllResultStatus, ResultStatus
 import TestCaseMaker as tcm
 from template import (
@@ -64,7 +63,7 @@ class HTMLOutput(Output):
             if status.result == 'RE':
                 self._MakeErrorHTML(status)
             else:
-                self._MakeDiffHTML(*status.outPaths)
+                self._MakeDiffHTML(status)
 
     def _MakeErrorHTML(self, status: ResultStatus) -> None:
         """エラーメッセージのHTMLファイル作成"""
@@ -76,8 +75,8 @@ class HTMLOutput(Output):
             bodyList.append('Error occured in Solve2.py<br>')
             bodyList.append(__class__.ToHTML(status.errMsg2))
 
-        outputPath = os.path.join(__class__.htmlPath, fl.GetOutputFilePath() + '.html')
-        with open(outputPath, 'w') as html:
+        HTMLPath = __class__.BuildHTMLPath(status)
+        with open(HTMLPath, 'w') as html:
             html.writelines(HTMLText.format(title='Error Message', body='\n'.join(bodyList)))
 
     def _InsertTextIntoHTMLHead(self, HTMLStr: str, text: str) -> str:
@@ -86,18 +85,18 @@ class HTMLOutput(Output):
         HTMLStrList.insert(HTMLStrList.index("<head>") + 1, text)
         return "\n".join(HTMLStrList)
 
-    def _MakeDiffHTML(self, path1: str, path2: str) -> None:
+    def _MakeDiffHTML(self, status: ResultStatus) -> None:
         """HTMLファイル作成"""
-        with open(path1, 'r') as f:
+        with open(status.outPaths[0], 'r') as f:
             file1 = f.readlines()
-        with open(path2, 'r') as f:
+        with open(status.outPaths[1], 'r') as f:
             file2 = f.readlines()
 
         # 比較結果HTMLを作成
         diff = HtmlDiff()
         diffStr = self._InsertTextIntoHTMLHead(diff.make_file(file1, file2), cssLink)
-        path = fl.GetOutputFilePath() + ".html"
-        with open(os.path.join(__class__.htmlPath, path), 'w') as html:
+        HTMLPath = __class__.BuildHTMLPath(status)
+        with open(HTMLPath, 'w') as html:
             html.writelines(diffStr)
 
     def _MakeHTMLResult(self) -> None:
@@ -114,7 +113,7 @@ class HTMLOutput(Output):
                 color = "violet"
             testCasePath = os.path.join(tcm.testCaseDirec, status.caseName)
             testCaseLink = HTMLLinkStr.format(path=testCasePath, string=status.caseName)
-            HTMLPath = os.path.join(__class__.htmlPath, "case" + str(status.idx) + ".html")
+            HTMLPath = __class__.BuildHTMLPath(status)
             HTMLLink = HTMLLinkStr.format(path=HTMLPath, string="Link")
             lineStr = TableBody.format(text1=testCaseLink, color=color, text2=status.result, text3=HTMLLink)
             textList.append(lineStr)
@@ -129,6 +128,11 @@ class HTMLOutput(Output):
     def ToHTML(text: str) -> str:
         """文字列をHTMLに簡易的に変換する"""
         return text.replace('\n', '<br>').replace(' ', '&nbsp;')
+
+    @classmethod
+    def BuildHTMLPath(clas, status: ResultStatus) -> str:
+        """ResultStatusの出力先HTMLファイルのパスを返す"""
+        return os.path.join(__class__.htmlPath, 'case' + str(status.idx) + '.html')
 
 class FileOutput(Output):
     """差分結果をファイル出力するクラス"""
