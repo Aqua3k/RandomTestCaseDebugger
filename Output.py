@@ -76,7 +76,7 @@ class HTMLOutput(Output):
             bodyList.append(__class__.ToHTML(status.errMsg2))
 
         HTMLPath = __class__.BuildHTMLPath(status)
-        with open(HTMLPath, 'w') as html:
+        with open(HTMLPath, 'w', encoding='utf-8', newline='\n') as html:
             html.writelines(HTMLText.format(title='Error Message', body='\n'.join(bodyList)))
 
     def _InsertTextIntoHTMLHead(self, HTMLStr: str, text: str) -> str:
