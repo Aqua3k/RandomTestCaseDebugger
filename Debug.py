@@ -9,18 +9,15 @@ import glob
 import os
 import shutil
 import filecmp
-from difflib import HtmlDiff
-from template import *
 from typing import Any
 import traceback
 
 import TestCaseMaker as tcm
 import FileLib as fl
-from MyLib import *
+from MyLib import GetIndex, ResultStatus, AllResultStatus
+from Output import StandardOutput, FileOutput, HTMLOutput
 
 outPath = "out"
-outFile = "Result"
-htmlPath = "html"
 
 ####################################
 #Debug用の入出力
@@ -79,108 +76,11 @@ def InitResult() -> None:
     shutil.rmtree(outPath, ignore_errors=True)
     os.mkdir(outPath)
 
-def MakeResultFile(AllStatus: list[ResultStatus]) -> None:
-    """実行結果ファイルを作成する"""
-    ACcount, WAcount, REcount = 0, 0, 0
-    diffList, errList = [], []
-    for status in AllStatus:
-        if status.IsErrorOccurred():
-            REcount += 1
-            if status.errFlg1:
-                errList.append(errorMessage.format(fileName=status.caseName,\
-                     progName="Solve1.py", errorMessage=status.errMsg1))
-            if status.errFlg2:
-                errList.append(errorMessage.format(fileName=status.caseName,\
-                     progName="Solve2.py", errorMessage=status.errMsg2))
-        elif status.result == "WA":
-            WAcount += 1
-            diffList.append(status.caseName)
-        elif status.result == "AC":
-            ACcount += 1
-        else: assert 0, "Error: Unkown status found."
-    
-    f = open("result.txt", 'w')
-    print(noDifference if WAcount == 0 else differenceFound.format(diffNum=WAcount), file=f)
-    print("\n".join(diffList), file=f)
-    print(file=f)
-    print(noError if REcount == 0 else ErrorOccured.format(errNum=REcount), file=f)
-    print("\n".join(errList), file=f)
-    StandardOutput(ACcount, WAcount, REcount)
-
-def InitHTML() -> None:
-    """HTMLの出力先ディレクトリを初期化する"""
-    shutil.rmtree(htmlPath, ignore_errors=True)
-    os.mkdir(htmlPath)
-
-def InsertTextIntoHTMLHead(HTMLStr: str, text: str) -> str:
-    """HTMLの文字列のHeadの中に別の文字列を挿入する"""
-    HTMLStrList = HTMLStr.split("\n")
-    HTMLStrList.insert(HTMLStrList.index("<head>") + 1, text)
-    return "\n".join(HTMLStrList)
-
-def MakeDiffHTML(path1: str, path2: str) -> None:
-    """HTMLファイル作成"""
-    with open(path1,'r') as f: file1 = f.readlines()
-    with open(path2,'r') as f: file2 = f.readlines()
-
-    # 比較結果HTMLを作成
-    diff = HtmlDiff()
-    diffStr = InsertTextIntoHTMLHead(diff.make_file(file1, file2), cssLink)
-    path = fl.GetOutputFilePath() + ".html"
-    with open(os.path.join(htmlPath, path) ,'w', encoding='utf-8', newline='\n') as html:
-        html.writelines(diffStr)
-
-def MakeErrorHTML(status: ResultStatus) -> None:
-    """エラーメッセージのHTMLファイル作成"""
-    bodyList = []
-    if status.errFlg1:
-        bodyList.append("Error occured in Solve1.py" + "<br>")
-        bodyList.append(status.errMsg1.replace("\n", "<br>").replace(" ", "&nbsp;"))
-    if status.errFlg2:
-        bodyList.append("Error occured in Solve2.py" + "<br>")
-        bodyList.append(status.errMsg2.replace("\n", "<br>").replace(" ", "&nbsp;"))
-    with open(os.path.join(htmlPath, fl.GetOutputFilePath() + ".html") ,'w',\
-         encoding='utf-8', newline='\n') as html:
-        html.writelines(HTMLText.format(title="Error Message", body="\n".join(bodyList)))
-
-def MakeHTMLResult(AllStatus: list[ResultStatus]) -> None:
-    """結果のHTMLファイル作成"""
-    textList = []
-    header = TableBody.format(text1="Test Case Name", color="", text2="Result", text3="Result Link")
-    textList.append(header)
-    for status in AllStatus:
-        if   status.result == "AC": color = "lime"
-        elif status.result == "WA": color = "yellow"
-        else:                       color = "violet"
-        testCasePath = os.path.join(tcm.testCaseDirec, status.caseName)
-        testCaseLink = HTMLLinkStr.format(path=testCasePath, string=status.caseName)
-        HTMLPath = os.path.join(htmlPath, "case" + str(status.idx) + ".html")
-        HTMLLink = HTMLLinkStr.format(path=HTMLPath, string="Link")
-        lineStr = TableBody.format(text1=testCaseLink, color=color, text2=status.result, text3=HTMLLink)
-        textList.append(lineStr)
-
-    tableHTML = Table.format(border=3, body="\n".join(textList))
-    resultFileName = "result.html"
-    with open(resultFileName ,'w', encoding='utf-8', newline='\n') as html:
-        text = HTMLText.format(body=tableHTML, title="Result")
-        html.writelines(InsertTextIntoHTMLHead(text, cssLink))
-
-def StandardOutput(ACcount: int, WAcount: int, REcount: int) -> None:
-    """結果のサマリを標準出力する"""
-    print("AC |", ACcount)
-    print("WA |", WAcount)
-    print("RE |", REcount)
-
-def OutputAllResult(AllStatus: list[ResultStatus]) -> None:
-    """結果出力のまとめ"""
-    MakeResultFile(AllStatus)
-    MakeHTMLResult(AllStatus)
-
 def InitAll():
     """初期化処理のまとめ
-    Note: 必要な初期化処理が増えた時のために分離しておく"""
+    Note: 必要な初期化処理が増えた時のために分離しておく
+    """
     InitResult()
-    InitHTML()
 
 def ExacTestCaseAndRecordResult(testCasePath: str) -> ResultStatus:
     """引数で与えられたテストケースを実行して結果を記録"""
@@ -201,30 +101,33 @@ def ExacTestCaseAndRecordResult(testCasePath: str) -> ResultStatus:
     #比較対象のファイルをGet
     files = glob.glob(os.path.join(outPath, fl.GetOutputFilePath(), "*"))
 
+    status.outPaths = files
+
     if status.IsErrorOccurred(): #エラーが発生した時はdiffのHTMLファイルは作れない
         status.result = "RE"
-        assert status.Check(), "Error: Some 'ResultStatus' class members have initial value."
-        MakeErrorHTML(status)
-        return status
     elif len(files) != 2:         pass #Getしたファイルの数が2個ではなかった場合(基本ありえない)
     elif not filecmp.cmp(*files): status.result = "WA"
     else:                         status.result = "AC"
 
-    #比較結果HTMLファイル作成
-    MakeDiffHTML(*files)
-    
     #全部のメンバに代入されたかチェック
     assert status.Check(), "Error: Some 'ResultStatus' class members have initial value."
     return status
 
 def main() -> None:
     InitAll()
-    AllStatus = []
+
+    allResultStatus = AllResultStatus()
     for testCasePath in GetAllFileName():
         status = ExacTestCaseAndRecordResult(testCasePath)
-        AllStatus.append(status)
-    SortedAllStatus = sorted(AllStatus) #index順でソート(case2.txtよりcase10.txtが先に出力される問題対策)
-    OutputAllResult(SortedAllStatus)
+        allResultStatus.RegisterResultStatus(status)
+
+    std = StandardOutput(allResultStatus)
+    std.Output()
+    file = FileOutput(allResultStatus)
+    file.Output()
+    html = HTMLOutput(allResultStatus)
+    html.Clear()
+    html.Output()
 
 if __name__ == "__main__":
     main()

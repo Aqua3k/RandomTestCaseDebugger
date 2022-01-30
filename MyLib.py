@@ -1,5 +1,7 @@
 # もし生成用の関数群を別ファイルに移すならここかな？
 
+from bisect import insort_left
+
 #UnionFind
 class UnionFind():
     def __init__(self, n):
@@ -63,6 +65,7 @@ class ResultStatus():
         self.idx = ""
         self.caseName = ""
         self.result = ""
+        self.outPaths = []
         self.errFlg1 = False
         self.errFlg2 = False
         self.errMsg1 = ""
@@ -84,3 +87,38 @@ class ResultStatus():
         """デバッグ用"""
         allMembers = [self.idx, self.caseName, self.result, self.errFlg1, self.errFlg2, self.errMsg1, self.errMsg2]
         return " ".join( list(map(str, allMembers)) ) + "\n"
+
+class AllResultStatus():
+    """ResultStatusのリスト用のクラス"""
+
+    def __init__(self) -> None:
+        self._allResultStatus = []
+        self.ACcount = 0
+        self.WAcount = 0
+        self.REcount = 0
+
+    def RegisterResultStatus(self, status: ResultStatus) -> None:
+        """ResultStatusを登録"""
+        insort_left(self._allResultStatus, status)
+        if status.result == 'AC':
+            self.ACcount += 1
+        elif status.result == 'WA':
+            self.WAcount += 1
+        else:
+            self.REcount += 1
+
+    def rawAllResultStatus(self) -> list[ResultStatus]:
+        """登楼したResultStatusのリストを返す"""
+        return self._allResultStatus
+
+    def __iter__(self):
+        self._i = 0
+        return self
+
+    def __next__(self):
+        if self._i < len(self._allResultStatus):
+            status = self._allResultStatus[self._i]
+            self._i += 1
+            return status
+        else:
+            raise StopIteration
