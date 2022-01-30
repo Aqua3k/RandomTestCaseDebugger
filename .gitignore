@@ -1,1 +1,6 @@
 __pycache__/
+in/
+out/
+html/
+result.txt
+result.html
