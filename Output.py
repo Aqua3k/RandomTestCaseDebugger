@@ -7,7 +7,7 @@ from MyLib import AllResultStatus, ResultStatus
 import TestCaseMaker as tcm
 from template import (
     errorMessage, noDifference, differenceFound, noError, ErrorOccured,
-    HTMLText, Table, HTMLLinkStr, TableBody, cssLink
+    HTMLText, Table, HTMLLinkStr, TableBody, TableBodyHeading, cssLink
 )
 
 class Output(ABC):
@@ -102,7 +102,7 @@ class HTMLOutput(Output):
     def _MakeHTMLResult(self) -> None:
         """結果のHTMLファイル作成"""
         textList = []
-        header = TableBody.format(text1="Test Case Name", color="", text2="Result", text3="Result Link")
+        header = TableBodyHeading.format(text1="Test Case Name", color="", text2="Result", text3="Result Link")
         textList.append(header)
         for status in self._allStatus:
             if status.result == "AC":

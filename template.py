@@ -14,7 +14,8 @@ HTMLLinkStr = '<a href="{path}">{string}</a><br>'
 cssLink = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.min.css">'
 
 Table = '<table border="{border}">{body}</table>'
-TableBody = '<tr><th>{text1}</th><th bgcolor={color}>{text2}</th><th>{text3}</th></tr>'
+TableBodyHeading = '<tr><th>{text1}</th><th bgcolor={color}>{text2}</th><th>{text3}</th></tr>'
+TableBody        = '<tr><td>{text1}</td><td bgcolor={color}>{text2}</td><td>{text3}</th></td>'
 HTMLFont = '<font size="{size}" >{text}</font>'
 
 HTMLText = '''
