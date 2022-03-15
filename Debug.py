@@ -18,8 +18,6 @@ import FileLib as fl
 from MyLib import GetIndex, ResultStatus, AllResultStatus
 from Output import StandardOutput, FileOutput, HTMLOutput
 
-outPath = "out"
-
 prog1 = "solve1.py"
 prog2 = "solve2.py"
 cmd = "python {name} < {inFile} > {outFile}"
@@ -37,7 +35,7 @@ def ExacSolve1(status: ResultStatus) -> None:
     errMsg = None
 
     inFile = fl.GetInputFileName()
-    outFile = "out\\case" + str(status.idx) + "\\"+ fl.GetOutputFileName()
+    outFile = fl.GetOutputFileName()
 
     res = subprocess.run(cmd.format(name=prog1, inFile=inFile, outFile=outFile),
      encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
@@ -55,7 +53,7 @@ def ExacSolve2(status: ResultStatus) -> None:
     errMsg = None
 
     inFile = fl.GetInputFileName()
-    outFile = "out\\case" + str(status.idx) + "\\"+ fl.GetOutputFileName()
+    outFile = fl.GetOutputFileName()
 
     res = subprocess.run(cmd.format(name=prog2, inFile=inFile, outFile=outFile),
      encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
@@ -69,8 +67,8 @@ def ExacSolve2(status: ResultStatus) -> None:
 
 def InitResult() -> None:
     """実行結果の出力先ディレクトリを初期化する"""
-    shutil.rmtree(outPath, ignore_errors=True)
-    os.mkdir(outPath)
+    shutil.rmtree(fl.outPath, ignore_errors=True)
+    os.mkdir(fl.outPath)
 
 def InitAll():
     """初期化処理のまとめ
@@ -87,15 +85,13 @@ def ExacTestCaseAndRecordResult(testCasePath: str) -> ResultStatus:
 
     #Solve1.py実行
     fl.SetFileName(testCasePath, "Solve1")
-    fl.SetFileContents()
     ExacSolve1(status)
     #Solve2.py実行
     fl.SetFileName(testCasePath, "Solve2")
-    fl.SetFileContents()
     ExacSolve2(status)
 
     #比較対象のファイルをGet
-    files = glob.glob(os.path.join(outPath, fl.GetOutputFilePath(), "*"))
+    files = glob.glob(os.path.join(fl.outPath, fl.GetOutputFilePath(), "*"))
 
     status.outPaths = files
 
