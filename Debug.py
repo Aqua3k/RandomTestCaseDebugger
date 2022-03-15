@@ -11,6 +11,7 @@ import shutil
 import filecmp
 from typing import Any
 import traceback
+import subprocess
 
 import TestCaseMaker as tcm
 import FileLib as fl
@@ -19,18 +20,9 @@ from Output import StandardOutput, FileOutput, HTMLOutput
 
 outPath = "out"
 
-####################################
-#Debug用の入出力
-
-def DebugPrint(*arg: Any, **keys: Any) -> None:
-    """実行結果をファイルに出力させる"""
-    f = open(os.path.join(outPath, fl.GetOutputFilePath(), fl.GetOutputFileName()), 'a')
-    print(*arg, **keys, file=f)
-    f.close()
-
-def DebugInput() -> str:
-    """入力をテストケースから読み取る"""
-    return str(fl.fileContents.pop())
+prog1 = "solve1.py"
+prog2 = "solve2.py"
+cmd = "python {name} < {inFile} > {outFile}"
 
 ####################################
 
@@ -43,15 +35,17 @@ def ExacSolve1(status: ResultStatus) -> None:
     """Solve1.pyを実行して実行結果を引数で与えられたクラスに記録する"""
     errFlg = False
     errMsg = None
-    try:
-        import Solve1
-        Solve1.print = DebugPrint
-        Solve1.input = DebugInput
-        Solve1.main()
-    except:
-        errMsg = traceback.format_exc()
+
+    inFile = fl.GetInputFileName()
+    outFile = "out\\case" + str(status.idx) + "\\"+ fl.GetOutputFileName()
+
+    res = subprocess.run(cmd.format(name=prog1, inFile=inFile, outFile=outFile),
+     encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
+    
+    if res.returncode != 0:
+        errMsg = res.stderr
         errFlg = True
-    if "Solve1" in sys.modules: del sys.modules["Solve1"]
+    
     status.errFlg1 = errFlg
     status.errMsg1 = errMsg
 
@@ -59,15 +53,17 @@ def ExacSolve2(status: ResultStatus) -> None:
     """Solve2.pyを実行して実行結果を引数で与えられたクラスに記録する"""
     errFlg = False
     errMsg = None
-    try:
-        import Solve2
-        Solve2.print = DebugPrint
-        Solve2.input = DebugInput
-        Solve2.main()
-    except:
-        errMsg = traceback.format_exc()
+
+    inFile = fl.GetInputFileName()
+    outFile = "out\\case" + str(status.idx) + "\\"+ fl.GetOutputFileName()
+
+    res = subprocess.run(cmd.format(name=prog2, inFile=inFile, outFile=outFile),
+     encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
+    
+    if res.returncode != 0:
+        errMsg = res.stderr
         errFlg = True
-    if "Solve2" in sys.modules: del sys.modules["Solve2"]
+    
     status.errFlg2 = errFlg
     status.errMsg2 = errMsg
 
