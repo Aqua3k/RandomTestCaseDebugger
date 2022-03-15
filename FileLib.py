@@ -2,8 +2,9 @@
 テストケースファイルと実行結果ファイルの名前・パスを保存・読み込みするユーティリティ
 """
 
-import Debug as dl
 import os
+
+outPath = "out"
 
 inputFileName = ""
 outputFileName = ""
@@ -15,21 +16,15 @@ def SetFileName(testCaseName: str, module: str) -> None:
     outputFileName = module + ".txt"
     outFilePath = os.path.basename(testCaseName).split(".")[0]
 
-    os.makedirs(os.path.join(dl.outPath, outFilePath), exist_ok=True)
+    os.makedirs(os.path.join(outPath, outFilePath), exist_ok=True)
 def GetInputFileName() -> str:
-    """実行するテストケースファイル名を取得"""
+    """実行するテストケースファイル名を取得
+    Note: Debug.pyからの相対パスを返す"""
     return inputFileName
 def GetOutputFileName() -> str:
-    """実行結果の出力先のファイル名を取得"""
-    return outputFileName
+    """実行結果の出力先のファイル名を取得
+    Note: Debug.pyからの相対パスを返す"""
+    return os.path.join(outPath, outFilePath, outputFileName)
 def GetOutputFilePath() -> str:
     """実行結果の出力先パスを取得"""
     return outFilePath
-
-fileContents = []
-def SetFileContents() -> None:
-    """テストケースの各行を読み込みfileContentsに保存"""
-    global fileContents
-    path = GetInputFileName()
-    with open(path) as f:
-        fileContents = [s.strip() for s in f.readlines()][::-1]
