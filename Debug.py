@@ -4,13 +4,11 @@ Solve1.pyとSolve2.pyをそれぞれのテストケースで実行し、実行�
 
 from __future__ import annotations
 
-import sys
 import glob
 import os
 import shutil
 import filecmp
-from typing import Any
-import traceback
+from typing import Tuple
 import subprocess
 
 import TestCaseMaker as tcm
@@ -29,41 +27,22 @@ def GetAllFileName() -> list[str]:
     return glob.glob(os.path.join(tcm.testCaseDirec, "*"))
 
 messages = []
-def ExacSolve1(status: ResultStatus) -> None:
-    """Solve1.pyを実行して実行結果を引数で与えられたクラスに記録する"""
+def ExacCommand(command: str) -> Tuple[bool, str|None]:
+    """与えられたコマンドを実行してエラーフラグとエラーメッセージを出力する"""
     errFlg = False
     errMsg = None
 
     inFile = fl.GetInputFileName()
     outFile = fl.GetOutputFileName()
 
-    res = subprocess.run(cmd.format(name=prog1, inFile=inFile, outFile=outFile),
+    res = subprocess.run(cmd.format(name=command, inFile=inFile, outFile=outFile),
      encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
     
     if res.returncode != 0:
         errMsg = res.stderr
         errFlg = True
     
-    status.errFlg1 = errFlg
-    status.errMsg1 = errMsg
-
-def ExacSolve2(status: ResultStatus) -> None:
-    """Solve2.pyを実行して実行結果を引数で与えられたクラスに記録する"""
-    errFlg = False
-    errMsg = None
-
-    inFile = fl.GetInputFileName()
-    outFile = fl.GetOutputFileName()
-
-    res = subprocess.run(cmd.format(name=prog2, inFile=inFile, outFile=outFile),
-     encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
-    
-    if res.returncode != 0:
-        errMsg = res.stderr
-        errFlg = True
-    
-    status.errFlg2 = errFlg
-    status.errMsg2 = errMsg
+    return errFlg, errMsg
 
 def InitResult() -> None:
     """実行結果の出力先ディレクトリを初期化する"""
@@ -85,10 +64,12 @@ def ExacTestCaseAndRecordResult(testCasePath: str) -> ResultStatus:
 
     #Solve1.py実行
     fl.SetFileName(testCasePath, "Solve1")
-    ExacSolve1(status)
+    errFlg, errMsg = ExacCommand(prog1)
+    status.errFlg1 = errFlg; status.errMsg1 = errMsg
     #Solve2.py実行
     fl.SetFileName(testCasePath, "Solve2")
-    ExacSolve2(status)
+    errFlg, errMsg = ExacCommand(prog2)
+    status.errFlg2 = errFlg; status.errMsg2 = errMsg
 
     #比較対象のファイルをGet
     files = glob.glob(os.path.join(fl.outPath, fl.GetOutputFilePath(), "*"))

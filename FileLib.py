@@ -28,4 +28,3 @@ def GetOutputFileName() -> str:
 def GetOutputFilePath() -> str:
     """実行結果の出力先パスを取得"""
     return outFilePath
-
